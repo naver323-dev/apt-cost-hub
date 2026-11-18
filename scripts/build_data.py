@@ -25,6 +25,8 @@ import molit  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW = os.path.join(ROOT, 'data', 'raw')
+COMMITTED = os.path.join(ROOT, 'data', 'committed')
+TRADE_CACHE = os.path.join(COMMITTED, 'trade_cache.json')
 OUT = os.path.join(ROOT, 'data', 'processed')
 
 FEE_FILE = os.path.join(RAW, 'kapt_fee.xlsx')
@@ -270,6 +272,24 @@ def build():
     # ---- 실거래가 (국토교통부 실거래가공개시스템 자료제공 CSV) -----------------
     region_keys = {(r['sido'], r['sgg']) for r in regions}
     trade = molit.build(region_keys)
+    stale = False
+    if trade is None and os.path.exists(TRADE_CACHE):
+        # 실거래 CSV를 못 받은 실행(네트워크 차단 등)에서는 마지막으로 받은 집계를 그대로 쓴다.
+        with open(TRADE_CACHE, encoding='utf-8') as f:
+            trade = json.load(f)
+        stale = True
+    elif trade is not None:
+        os.makedirs(COMMITTED, exist_ok=True)
+        cache = {'months': trade['months'], 'national': trade['national'],
+                 'regions': {f'{k[0]}|{k[1]}': v for k, v in trade['regions'].items()},
+                 'rows': trade['rows'], 'rows_unmatched': trade['rows_without_kapt_region'],
+                 'collected_at': snapshot_date()}
+        with open(TRADE_CACHE, 'w', encoding='utf-8') as f:
+            json.dump(cache, f, ensure_ascii=False, separators=(',', ':'))
+    if trade and stale:
+        trade = {'months': trade['months'], 'national': trade['national'],
+                 'regions': {tuple(k.split('|')): v for k, v in trade['regions'].items()},
+                 'rows': trade['rows'], 'rows_without_kapt_region': trade['rows_unmatched']}
     trade_summary = None
     if trade:
         tmonths = trade['months']
@@ -281,6 +301,7 @@ def build():
             'national': trade['national'],
             'rows': trade['rows'],
             'rows_unmatched': trade['rows_without_kapt_region'],
+            'stale': stale,
         }
         for r in regions:
             r['trade'] = trade['regions'].get((r['sido'], r['sgg']), {})

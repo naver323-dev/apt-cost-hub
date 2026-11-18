@@ -245,7 +245,7 @@ def build_index(d):
         trade_section = f"""
 <section>
   <h2>아파트 매매 실거래 · 세대수 상위 50개 시군구</h2>
-  <p class="sub">{tr['reference_month_label']} 계약분 · 건수 {fmt_int(tn.get('count'))}건(전국) · 중간 매매가 {fmt_price(tn.get('median_price'))} · 중간 평당가 {fmt_dec(tn.get('median_per_pyeong'))}만원. 신고 기한이 30일이라 최근 월은 잠정치입니다.</p>
+  <p class="sub">{tr['reference_month_label']} 계약분 · 건수 {fmt_int(tn.get('count'))}건(전국) · 중간 매매가 {fmt_price(tn.get('median_price'))} · 중간 평당가 {fmt_dec(tn.get('median_per_pyeong'))}만원. 신고 기한이 30일이라 최근 월은 잠정치입니다.{' · 실거래 자동 수집이 지연되어 최근 수집분을 표시합니다.' if tr.get('stale') else ''}</p>
   <div class="tablewrap"><table class="data"><thead><tr>
     <th>지역</th><th class="r">거래 건수</th><th class="r">중간 매매가</th><th class="r">평당가(만원)</th>
   </tr></thead><tbody>{trade_rows}</tbody></table></div>
@@ -393,7 +393,7 @@ def build_region(d, r):
         trade_section = f'''
 <section>
   <h2>아파트 매매 실거래</h2>
-  <p class="sub">국토교통부 실거래가공개시스템 자료(계약일 기준, 해제 거래 제외). 중간값 기준입니다.</p>
+  <p class="sub">국토교통부 실거래가공개시스템 자료(계약일 기준, 해제 거래 제외). 중간값 기준입니다.{' 최근 수집분 기준입니다.' if tr.get('stale') else ''}</p>
   <div class="tablewrap narrow"><table class="data"><thead><tr>
     <th>계약월</th><th class="r">거래 건수</th><th class="r">중간 매매가</th><th class="r">중간 평당가(만원)</th>
   </tr></thead><tbody>{trade_row_html}</tbody></table></div>

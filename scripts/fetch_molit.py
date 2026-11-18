@@ -75,9 +75,13 @@ def fetch(ym, retries=2):
     return None
 
 
-def main():
+def main(argv=None):
+    argv = argv or sys.argv[1:]
+    n = 4
+    if '--months' in argv:
+        n = int(argv[argv.index('--months') + 1])
     os.makedirs(OUT, exist_ok=True)
-    wanted = months_back(4)
+    wanted = months_back(n)
     ok = 0
     for ym in wanted:
         target = os.path.join(OUT, f'apt_{ym}.csv')

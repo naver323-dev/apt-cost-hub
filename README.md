@@ -4,7 +4,8 @@
 집계해 정적 사이트로 배포합니다. 서버·DB·유료 API 없이 파이썬 표준 라이브러리만 씁니다.
 
 - 사이트: https://apt-cost-hub.pages.dev
-- 데이터: 매주 월요일 GitHub Actions가 재생성 (`deploy` 브랜치로 배포)
+- 저장소: https://github.com/naver323-dev/apt-cost-hub
+- 데이터: 매일 05:30 KST GitHub Actions가 재생성 (`deploy` 브랜치로 배포)
 
 ## 원자료
 
@@ -29,7 +30,7 @@
 
 ```bash
 python3 scripts/fetch_kapt.py     # K-apt 주간 파일 (세션 필요 → 스크립트가 처리)
-python3 scripts/fetch_molit.py    # 실거래 CSV 4개월 (네트워크에 따라 실패 가능, 기존 파일 유지)
+python3 scripts/fetch_molit.py    # 실거래 CSV (기본 4개월, --months N) · 실패 시 기존 파일/캐시 유지
 python3 scripts/build_data.py     # data/processed/dataset.json
 python3 -m unittest discover -s tests -v
 python3 scripts/build_site.py     # site/
