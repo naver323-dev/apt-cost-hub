@@ -1,0 +1,102 @@
+name: daily refresh
+
+# K-apt 관리비(주 1회 갱신)와 국토교통부 실거래가(계약일 기준)를 매일 다시 받아
+# 사이트를 재생성하고, deploy 브랜치(단일 커밋)로 배포한다.
+#   - 매일 05:30 KST (UTC 20:30)
+#   - 실거래 CSV는 actions/cache에 남겨 두고 최근 2개월만 새로 받는다.
+#   - 실거래 수집이 막히면 커밋된 data/committed/trade_cache.json으로 빌드한다.
+on:
+  schedule:
+    - cron: '30 20 * * *'   # 매일 05:30 KST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-refresh
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore 실거래 CSV cache
+        uses: actions/cache/restore@v4
+        with:
+          path: data/raw/molit
+          key: molit-csv-${{ github.run_id }}
+          restore-keys: |
+            molit-csv-
+
+      - name: Fetch K-apt weekly files
+        run: python3 scripts/fetch_kapt.py
+
+      - name: Fetch 실거래가 CSV (최근 2개월, 실패해도 기존 파일 유지)
+        run: python3 scripts/fetch_molit.py --months 2
+        continue-on-error: true
+
+      - name: Cache 실거래 CSV
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/raw/molit
+          key: molit-csv-${{ github.run_id }}
+
+      - name: Build dataset
+        run: python3 scripts/build_data.py
+
+      - name: Unit tests
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Build site
+        run: python3 scripts/build_site.py
+
+      - name: Validate site
+        run: python3 scripts/check_site.py
+
+      - name: Commit refreshed data snapshot
+        run: |
+          set -euo pipefail
+          git config user.name "apt-cost-hub"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/committed/trade_cache.json
+          if git diff --staged --quiet; then
+            echo "trade cache unchanged"
+          else
+            git commit -m "data: 실거래 집계 캐시 갱신 $(date -u +%Y-%m-%d)"
+            git push
+          fi
+
+      - name: Publish to deploy branch (single commit)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          cd site
+          git init -q
+          git checkout -q -b deploy
+          git config user.name "apt-cost-hub"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -qm "site: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" deploy
+
+      - name: Summary
+        run: |
+          python3 - <<'PY'
+          import json
+          d = json.load(open('data/processed/dataset.json', encoding='utf-8'))
+          n = d['national']; t = d.get('trade') or {}
+          print(f"관리비 {d['reference_month']} · 단지 {n['complexes']:,} · 시군구 {n['regions']}")
+          print(f"실거래 {t.get('reference_month')} · {t.get('rows', 0):,}건 · stale={t.get('stale')}")
+          PY
