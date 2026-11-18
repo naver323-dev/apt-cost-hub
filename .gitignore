@@ -5,3 +5,4 @@ data/raw/molit/*.csv
 data/processed/*.json
 data/private/
 site/
+site_stale_git/
