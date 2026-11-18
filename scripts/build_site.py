@@ -6,6 +6,8 @@ hand and no value is estimated.
 """
 from __future__ import annotations
 
+import datetime
+import hashlib
 import html
 import json
 import os
@@ -22,6 +24,10 @@ SITE_NAME = '아파트 관리비 인사이트'
 BASE = 'https://apt-cost-hub.pages.dev'
 GA4_ID = 'G-J80R3CFWY8'
 SNAPSHOT_NOTE = 'K-apt(공동주택관리정보시스템) 자료실 주 1회 공개 자료'
+UPDATE_NOTE = '관리비는 주 1회(K-apt), 실거래는 매일, 사이트는 매일 05:30 KST에 자동 재생성'
+LASTMOD_FILE = os.path.join(ROOT, 'data', 'committed', 'lastmod.json')
+KST = datetime.timezone(datetime.timedelta(hours=9))
+CAPITAL_SIDO = ('서울특별시', '경기도', '인천광역시')
 
 sys.path.insert(0, os.path.join(ROOT, 'scripts'))
 from calc import region_rank, rank_list, fmt_int, fmt_dec, won, fmt_price  # noqa: E402
@@ -34,6 +40,41 @@ def esc(s):
 def load():
     with open(DATA, encoding='utf-8') as f:
         return json.load(f)
+
+
+def _hash(obj):
+    return hashlib.sha1(json.dumps(obj, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:16]
+
+
+class Lastmod:
+    """페이지 내용 지문으로 lastmod를 정한다.
+
+    같은 지문이면 이전 빌드의 날짜를 그대로 쓰고, 지문이 바뀐 페이지만 오늘(KST)으로
+    올린다. 그래서 값이 바뀌지 않은 페이지의 lastmod는 움직이지 않는다.
+    """
+
+    def __init__(self):
+        self.state = {}
+        self.prev = {}
+        if os.path.exists(LASTMOD_FILE):
+            try:
+                with open(LASTMOD_FILE, encoding='utf-8') as f:
+                    self.prev = json.load(f)
+            except ValueError:
+                self.prev = {}
+        self.today = datetime.datetime.now(KST).strftime('%Y-%m-%d')
+
+    def of(self, key, payload):
+        h = _hash(payload)
+        old = self.prev.get(key) or {}
+        day = old.get('d') if old.get('h') == h and old.get('d') else self.today
+        self.state[key] = {'h': h, 'd': day}
+        return day
+
+    def save(self):
+        os.makedirs(os.path.dirname(LASTMOD_FILE), exist_ok=True)
+        with open(LASTMOD_FILE, 'w', encoding='utf-8') as f:
+            json.dump(self.state, f, ensure_ascii=False, separators=(',', ':'), sort_keys=True)
 
 
 # ---------------------------------------------------------------- layout ----
@@ -115,6 +156,29 @@ ITEM_LABELS = [
     ('outsourced', '위탁관리수수료'),
 ]
 
+# 홈 상단의 작은 검색창: /api/search.json(지역 251 + 단지 페이지 1,500)을 클라이언트에서 필터링
+SEARCH_HTML = ('<div class="search"><input id="q" type="search" autocomplete="off" '
+               'placeholder="시군구·단지 검색 (예: 수성구, 한남더힐)" aria-label="시군구·단지 검색">'
+               '<ul id="qr" class="qres"></ul></div>')
+
+SEARCH_JS = """<script>
+(function(){
+  var i=document.getElementById('q'), u=document.getElementById('qr'), p=null;
+  if(!i||!u) return;
+  function L(){ if(!p){ p=fetch('/api/search.json').then(function(r){return r.json();}); } return p; }
+  i.addEventListener('input', function(){
+    var q=i.value.trim().toLowerCase();
+    if(!q){ u.innerHTML=''; return; }
+    L().then(function(a){
+      var o=[], k, n=0;
+      for(k=0;k<a.length&&n<8;k++){ if(a[k].k.indexOf(q)>=0){ o.push('<li><a href="'+a[k].u+'">'+a[k].n+'</a></li>'); n++; } }
+      u.innerHTML = o.length ? o.join('') : '<li class="muted">결과 없음</li>';
+    });
+  });
+  i.addEventListener('focus', function(){ L(); });
+})();
+</script>"""
+
 
 def region_table(rows, start=1, link=True, limit=None):
     out = ['<div class="tablewrap"><table class="data"><thead><tr>'
@@ -156,7 +220,7 @@ def trade_summary_rows(regions, month, limit=50):
     return rows
 
 
-def build_index(d):
+def build_index(d, lm=None):
     regions = d['regions']
     ranked = [r for r in regions if r['counted'] >= 30 and r['fee_m2'] is not None]
     lowest = sorted(ranked, key=lambda r: r['fee_m2'])[:10]
@@ -166,6 +230,8 @@ def build_index(d):
     tr = d.get('trade') or {}
     tm = tr.get('reference_month')
     tn = (tr.get('national') or {}).get(tm, {}) if tm else {}
+    lm = lm or d['snapshot_date']
+    hist_months = min(12, len([m for m in d['month_coverage'] if m <= d['reference_month']]))
     # cheapest per-pyeong regions among those with enough trades
     trade_rank = sorted([r for r in regions if ((r.get('trade') or {}).get(tm) or {}).get('count', 0) >= 50],
                         key=lambda r: r['trade'][tm]['median_per_pyeong'])[:10]
@@ -191,7 +257,7 @@ def build_index(d):
          "거래 1건마다 ‘거래금액 ÷ 전용면적 × 3.305785’로 평당 금액을 구한 뒤, 그 지역 거래들의 중간값을 씁니다. "
          "평균 대신 중간값을 쓰는 이유는 고가 거래 한 건이 지역 값을 끌고 가지 않게 하기 위해서입니다."),
         ('세대당 총관리비는 무엇을 더한 값인가요?',
-         "공용관리비 + 개별사용료(전기·수도·난방 등) + 장기선충당금 월부과액을 더해 세대수로 나눈 값입니다. "
+         "공용관리비 + 개별사용료(전기·수도·난방 등) + 장기수선충당금 월부과액을 더해 세대수로 나눈 값입니다. "
          "개별사용료는 사용량에 따라 달라지므로 지역 비교에는 ㎡당 공용관리비를 권합니다."),
         ('왜 우리 단지가 보이지 않나요?',
          "K-apt 관리비 공개는 300세대 이상, 150세대 이상이면서 승강기 또는 중앙난방이 있는 단지 등 ‘관리비 공개의무단지’가 대상입니다. "
@@ -200,7 +266,7 @@ def build_index(d):
          f"단지 30곳 이상이 집계된 지역 가운데 {lowest[0]['sido']} {lowest[0]['sgg']}가 ㎡당 {fmt_dec(lowest[0]['fee_m2'])}원으로 가장 낮았습니다. "
          f"다음은 {lowest[1]['sido']} {lowest[1]['sgg']}({fmt_dec(lowest[1]['fee_m2'])}원), {lowest[2]['sido']} {lowest[2]['sgg']}({fmt_dec(lowest[2]['fee_m2'])}원) 순입니다."),
         ('얼마나 자주 갱신되나요?',
-         "관리비는 K-apt 파일이 주 1회 갱신되고, 실거래가는 매달 자료제공 파일을 받아 반영합니다. 이 사이트는 매주 자동으로 다시 만들어집니다."),
+         "관리비는 K-apt 파일이 주 1회 갱신되고, 실거래가는 매일, 이 사이트는 매일 05:30(KST)에 자동으로 다시 만들어집니다."),
     ]
     ld = {
         "@context": "https://schema.org",
@@ -211,13 +277,13 @@ def build_index(d):
             {"@type": "WebPage", "@id": BASE + "/#webpage", "url": BASE + "/",
              "name": f"전국 아파트 관리비·실거래가 순위 ({d['reference_month_label']} 기준)",
              "inLanguage": "ko-KR", "isPartOf": {"@id": BASE + "/#website"},
-             "dateModified": d['snapshot_date']},
+             "dateModified": lm},
             {"@type": "Dataset", "@id": BASE + "/#dataset",
              "name": "전국 공동주택 관리비·아파트 매매 실거래 집계",
              "description": f"K-apt 관리비공개의무단지 공개 자료와 국토교통부 실거래가공개시스템 자료를 시군구 단위로 집계한 통계. 관리비 기준월 {d['reference_month_label']}, 실거래 기준월 {tr.get('reference_month_label', '—')}.",
              "temporalCoverage": f"{d['reference_month']}-01/{tr.get('reference_month', d['reference_month'])}-28",
-             "dateModified": d['snapshot_date'],
-             "creator": {"@type": "Organization", "name": "국토교통부"},
+             "dateModified": lm,
+             "creator": {"@type": "Organization", "name": SITE_NAME + " (K-apt·국토교통부 공개 자료 집계)"},
              "isBasedOn": ["https://www.data.go.kr/data/3039714/fileData.do",
                            "https://rt.molit.go.kr/"],
              "license": "https://www.data.go.kr/ugs/selectPortalPolicyView.do",
@@ -267,26 +333,52 @@ def build_index(d):
   </tr></thead><tbody>{rows}</tbody></table></div>
 </section>
 """
+    capital = [r for r in regions if r['sido'] in CAPITAL_SIDO][:12]
+    cap_rows = ''
+    for r in capital:
+        t = ((r.get('trade') or {}).get(tm) or {}) if tm else {}
+        cap_rows += (
+            f'<tr><td><a href="/region/{r["slug"]}">{esc(r["sgg"])}</a></td>'
+            f'<td class="r">{fmt_int(t["count"])}</td>'
+            f'<td class="r num">{fmt_price(t["median_price"])}</td>'
+            f'<td class="r num">{fmt_dec(t["median_per_pyeong"])}</td>'
+            f'<td class="r num">{fmt_dec(r["fee_m2"])}</td>'
+            f'<td class="r num">{fmt_int(r["fee_hh"])}</td></tr>' if t else
+            f'<tr><td><a href="/region/{r["slug"]}">{esc(r["sgg"])}</a></td>'
+            f'<td class="r">—</td><td class="r num">—</td><td class="r num">—</td>'
+            f'<td class="r num">{fmt_dec(r["fee_m2"])}</td><td class="r num">{fmt_int(r["fee_hh"])}</td></tr>')
+    capital_section = f"""
+<section>
+  <h2>수도권(서울·경기·인천) 주요 시군구</h2>
+  <p class="sub">세대수 상위 12곳. 실거래는 {tr.get('reference_month_label', '—')} 계약분, 관리비는 {d['reference_month_label']} 기준입니다.</p>
+  <div class="tablewrap"><table class="data"><thead><tr>
+    <th>지역</th><th class="r">거래 건수</th><th class="r">중간 매매가</th><th class="r">평당가(만원)</th>
+    <th class="r">㎡당 관리비</th><th class="r">세대당 총관리비</th>
+  </tr></thead><tbody>{cap_rows}</tbody></table></div>
+</section>
+"""
     body = f"""
 <section class="hero">
   <h1>전국 아파트 관리비·실거래가, 지역별로 한눈에</h1>
-  <p class="lead">관리비 {d['reference_month_label']} · 실거래 {tr.get('reference_month_label', '—')} · K-apt·국토교통부 공개 자료 집계 · {fmt_int(n['regions'])}개 시군구 · {fmt_int(n['complexes'])}개 단지</p>
+  <p class="lead">실거래 {tr.get('reference_month_label', '—')} · 관리비 {d['reference_month_label']} · 국토교통부·K-apt 공개 자료 집계 · {fmt_int(n['regions'])}개 시군구 · {fmt_int(n['complexes'])}개 단지</p>
+  {SEARCH_HTML}
   <div class="cards">
+    {trade_cards}
     <div class="card"><span>전국 ㎡당 공용관리비</span><strong>{fmt_dec(n['fee_m2'])}<small>원/㎡·월</small></strong></div>
     <div class="card"><span>집계 단지</span><strong>{fmt_int(n['complexes'])}<small>곳</small></strong></div>
     <div class="card"><span>집계 세대</span><strong>{fmt_int(n['households'])}<small>세대</small></strong></div>
-    {trade_cards}
   </div>
   {'' if not d['provisional'] else '<p class="notice">' + esc(d['reference_month_label']) + ' 관리비는 공개가 진행 중인 잠정 집계입니다. 신고가 끝난 단지만 포함되어 지역 평균이 다소 달라질 수 있습니다.</p>'}
   {'' if not d.get('kapt_stale') else '<p class="notice">관리비 원본 수집이 지연되어 ' + esc(d['snapshot_date']) + ' 스냅샷을 표시합니다. 다음 자동 갱신에서 최신 공개분으로 교체됩니다.</p>'}
 </section>
 
+{trade_section}
+{capital_section}
 <section>
   <h2>세대수 상위 50개 시군구 관리비</h2>
-  <p class="sub">세대수가 많은 순입니다. ㎡당 공용관리비는 면적 가중평균, 세대당 총관리비는 공용관리비+개별사용료+장기선충당금 기준입니다.</p>
+  <p class="sub">세대수가 많은 순입니다. ㎡당 공용관리비는 면적 가중평균, 세대당 총관리비는 공용관리비+개별사용료+장기수선충당금 기준입니다.</p>
   {region_table(top50)}
 </section>
-{trade_section}
 {cheap_trade}
 <section class="two">
   <div>
@@ -309,16 +401,19 @@ def build_index(d):
     <li>관리비는 단지마다 부과 항목과 면적 기준이 달라, ㎡당 공용관리비로 비교하는 것이 가장 공정합니다.</li>
     <li>실거래는 계약일 기준이고 신고 기한이 30일이라, 최근 월은 신고가 더 들어오면 값이 달라집니다.</li>
     <li>평당가는 전용면적 기준입니다. 같은 단지라도 평형·층·향에 따라 거래금액이 크게 달라집니다.</li>
-    <li>전체 지역 {fmt_int(n['regions'])}곳의 표와 단지별 12개월 추이는 지역 페이지에서 볼 수 있습니다.</li>
+    <li>전체 지역 {fmt_int(n['regions'])}곳의 표와 단지별 최근 {hist_months}개월 추이는 지역 페이지에서 볼 수 있습니다.</li>
   </ul>
 </section>
+{SEARCH_JS}
 """
     return head(f"전국 아파트 관리비·실거래가 — {d['reference_month_label']} 시군구별 비교",
                 f"{d['reference_month_label']} K-apt 관리비와 {tr.get('reference_month_label', '')} 실거래를 전국 {fmt_int(n['complexes'])}개 단지·{fmt_int(n['regions'])}개 시군구로 정리했습니다.",
                 BASE + '/', ld) + body + foot(d)
 
 
-def build_region(d, r):
+def build_region(d, r, page_ids=None, lm=None):
+    page_ids = page_ids or set()
+    hist_months = min(12, len([m for m in d['month_coverage'] if m <= d['reference_month']]))
     complexes = sorted(r['_complexes'], key=lambda c: (-c['households'], c['name']))
     ranked = [x for x in d['regions'] if x['counted'] >= 30 and x['fee_m2'] is not None]
     rank_asc = sorted(ranked, key=lambda x: x['fee_m2'])
@@ -343,11 +438,12 @@ def build_region(d, r):
         {"@type": "WebPage", "@id": f"{BASE}/region/{r['slug']}#webpage",
          "url": f"{BASE}/region/{r['slug']}",
          "name": f"{name} 아파트 관리비 — {d['reference_month_label']}",
-         "inLanguage": "ko-KR", "dateModified": d['snapshot_date']},
+         "inLanguage": "ko-KR", "dateModified": lm or d['snapshot_date']},
         {"@type": "Dataset", "name": f"{name} 아파트 관리비 집계",
          "description": f"{d['reference_month_label']} K-apt 공개 자료 기준 {name} {fmt_int(r['complexes'])}개 단지의 ㎡당 관리비·세대당 총관리비.",
-         "dateModified": d['snapshot_date'],
-         "creator": {"@type": "Organization", "name": "국토교통부 공동주택관리정보시스템(K-apt)"},
+         "dateModified": lm or d['snapshot_date'],
+         "creator": {"@type": "Organization", "name": SITE_NAME + " (K-apt 공개 자료 집계)"},
+         "isBasedOn": ["https://www.data.go.kr/data/3039714/fileData.do"],
          "license": "https://www.data.go.kr/ugs/selectPortalPolicyView.do",
          "distribution": [{"@type": "DataDownload", "encodingFormat": "application/json",
                            "contentUrl": f"{BASE}/api/regions/{r['slug']}.json"}]},
@@ -363,10 +459,20 @@ def build_region(d, r):
         for key, label in ITEM_LABELS)
     items += (f'<tr class="total"><td>공용관리비 합계</td>'
               f'<td class="r num">{fmt_dec(r["fee_m2"])}</td><td class="r num">100.0%</td></tr>')
+    unclass = r.get('unclassified_m2') or 0
+    unclass_row = ''
+    if unclass > 0:
+        unclass_row = (f'<tr class="total"><td>미분류(세부항목 미공개)</td>'
+                       f'<td class="r num">{fmt_dec(unclass)}</td>'
+                       f'<td class="r num">{fmt_dec(unclass / r["fee_m2"] * 100, 1)}%</td></tr>')
     rows = []
     for c in complexes[:40]:
+        if c['id'] in page_ids:
+            cname = f'<a href="/complex/{c["id"]}">{esc(c["name"])}</a>'
+        else:
+            cname = esc(c['name'])
         rows.append(
-            f'<tr><td><a href="/complex/{c["id"]}">{esc(c["name"])}</a></td>'
+            f'<tr><td>{cname}</td>'
             f'<td>{esc(c["dong"])}</td>'
             f'<td class="r">{fmt_int(c["households"])}</td>'
             f'<td class="r">{fmt_int(c["dongs"])}</td>'
@@ -409,18 +515,18 @@ def build_region(d, r):
   <h1>{esc(name)} 아파트 관리비</h1>
   <p class="lead">{d['reference_month_label']} 기준 · 단지 {fmt_int(r['complexes'])}곳 · 세대 {fmt_int(r['households'])}세대 · {rank_txt}</p>
   <div class="cards">
+    {trade_cards}
     <div class="card"><span>㎡당 공용관리비</span><strong>{fmt_dec(r['fee_m2'])}<small>원/㎡·월</small></strong></div>
     <div class="card"><span>단지별 중위값</span><strong>{fmt_dec(r['median_fee_m2'])}<small>원/㎡·월</small></strong></div>
     <div class="card"><span>세대당 총관리비</span><strong>{fmt_int(r['fee_hh'])}<small>원/월</small></strong></div>
     <div class="card"><span>전월 대비</span><strong>{mom_badge(r['mom_pct'])}</strong></div>
   </div>
-  {trade_cards}
 </section>
 {trade_section}
 
 <section>
   <h2>단지별 관리비</h2>
-  <p class="sub">세대수 순 상위 {min(40, len(complexes))}곳입니다. 단지명을 누르면 12개월 추이와 항목별 내역이 나옵니다.</p>
+  <p class="sub">세대수 순 상위 {min(40, len(complexes))}곳입니다. 단지명이 링크로 보이는 곳은 단지 페이지에서 최근 {hist_months}개월 추이와 항목별 내역을 볼 수 있습니다(나머지는 이 지역 표와 JSON 피드로 제공).</p>
   <div class="tablewrap"><table class="data"><thead><tr>
     <th>단지</th><th>동</th><th class="r">세대</th><th class="r">동수</th>
     <th class="r">㎡당</th><th class="r">세대당</th><th class="r">전월</th>
@@ -432,9 +538,9 @@ def build_region(d, r):
 
 <section>
   <h2>공용관리비 항목별 구성</h2>
-  <p class="sub">면적 가중평균, 단위 원/㎡·월. 비중은 공용관리비 합계 대비입니다.</p>
+  <p class="sub">면적 가중평균, 단위 원/㎡·월. 비중은 공용관리비 합계 대비입니다. K-apt가 세부항목을 공개하지 않은 단지가 있어 ‘미분류’가 남을 수 있습니다.</p>
   <div class="tablewrap"><table class="data"><thead><tr><th>항목</th><th class="r">원/㎡</th><th class="r">비중</th></tr></thead>
-  <tbody>{items}</tbody></table></div>
+  <tbody>{items}{unclass_row}</tbody></table></div>
 </section>
 
 {faq_block(faq)}
@@ -446,7 +552,7 @@ def build_region(d, r):
                 f"{BASE}/region/{r['slug']}", ld) + body + foot(d)
 
 
-def build_complex(d, c, r):
+def build_complex(d, c, r, lm=None):
     name = c['name']
     pct = None
     if r and r['fee_m2'] and c['fee_m2']:
@@ -460,15 +566,21 @@ def build_complex(d, c, r):
         for key, label in ITEM_LABELS)
     items += (f'<tr class="total"><td>공용관리비 합계</td>'
               f'<td class="r num">{fmt_dec(c["fee_m2"])}</td><td class="r num">100.0%</td></tr>')
+    unclass = c.get('unclassified') or 0
+    if unclass > 0 and c['common_fee']:
+        items += (f'<tr class="total"><td>미분류(세부항목 미공개)</td>'
+                  f'<td class="r num">{fmt_dec(unclass / c["billing_area"])}</td>'
+                  f'<td class="r num">{fmt_dec(unclass / c["common_fee"] * 100, 1)}%</td></tr>')
     prev = c.get('prev_fee_m2')
     ld = {"@context": "https://schema.org", "@graph": [
         {"@type": "WebPage", "url": f"{BASE}/complex/{c['id']}",
          "name": f"{name} 관리비 — {d['reference_month_label']}",
-         "inLanguage": "ko-KR", "dateModified": d['snapshot_date']},
+         "inLanguage": "ko-KR", "dateModified": lm or d['snapshot_date']},
         {"@type": "Dataset", "name": f"{name} 관리비 시계열",
          "description": f"{name}({esc(c['sgg'])}, {fmt_int(c['households'])}세대)의 K-apt 공개 관리비. 기준월 {d['reference_month_label']} ㎡당 {fmt_dec(c['fee_m2'])}원.",
-         "dateModified": d['snapshot_date'],
-         "creator": {"@type": "Organization", "name": "국토교통부 공동주택관리정보시스템(K-apt)"},
+         "dateModified": lm or d['snapshot_date'],
+         "creator": {"@type": "Organization", "name": SITE_NAME + " (K-apt 공개 자료 집계)"},
+         "isBasedOn": ["https://www.data.go.kr/data/3039714/fileData.do"],
          "license": "https://www.data.go.kr/ugs/selectPortalPolicyView.do"},
         {"@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "홈", "item": BASE + "/"},
@@ -515,22 +627,24 @@ def build_complex(d, c, r):
                 f"{BASE}/complex/{c['id']}", ld) + body + foot(d)
 
 
-def build_about(d):
+def build_about(d, lm=None):
     n = d['national']
-    q = d.get('quality') or {'area_suspect': 0, 'no_fee': 0}
+    q = d.get('quality') or {'area_suspect': 0, 'struct_suspect': 0, 'low_fee': 0, 'no_fee': 0}
+    q = {'area_suspect': q.get('area_suspect', 0), 'struct_suspect': q.get('struct_suspect', 0),
+         'low_fee': q.get('low_fee', 0), 'no_fee': q.get('no_fee', 0)}
     faq = [
         ("데이터 출처는 무엇인가요?",
          "K-apt(공동주택관리정보시스템) 자료실의 ‘K-apt 관리비공개의무단지 관리비정보’와 ‘면적정보’ 파일입니다. 두 자료는 공공데이터포털에도 같은 내용이 등록되어 있습니다(이용허락범위 제한 없음)."),
         ("어떤 단지가 포함되나요?",
          "관리비 공개 의무단지(300세대 이상, 150세대 이상이면서 승강기·중앙난방 보유 등) 중 해당 월 관리비가 공개된 단지입니다."),
         ("갱신 주기는 어떻게 되나요?",
-         "K-apt는 주 1회 파일을 갱신하며, 이 사이트는 매주 자동으로 다시 만들어집니다. 기준월은 공개가 끝난 최신 월입니다."),
+         "K-apt는 주 1회 파일을 갱신하고 실거래는 매일 받아 반영하며, 이 사이트는 매일 05:30(KST)에 자동으로 다시 만들어집니다. 기준월은 공개가 끝난 최신 월입니다."),
         ("값을 임의로 보정하거나 추정하지 않나요?",
          "아니요. 공개된 값을 그대로 쓰고, 계산은 나눗셈·가중평균만 합니다. 공개되지 않은 단지나 월은 비워 둡니다."),
     ]
     ld = {"@context": "https://schema.org", "@graph": [
         {"@type": "WebPage", "url": BASE + "/about", "name": "데이터 출처·산식·한계",
-         "inLanguage": "ko-KR", "dateModified": d['snapshot_date']},
+         "inLanguage": "ko-KR", "dateModified": lm or d['snapshot_date']},
         {"@type": "FAQPage", "mainEntity": [
             {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]},
     ]}
@@ -568,7 +682,9 @@ def build_about(d):
     <li>관리비 공개 의무가 없는 단지(소규모)는 포함되지 않습니다.</li>
     <li>신고·공개가 늦은 단지는 해당 월 집계에서 빠지므로 잠정 집계월은 평균이 달라질 수 있습니다.</li>
     <li>개별사용료(전기·수도·난방)는 사용량에 따라 달라 지역 비교 지표로 쓰지 않았습니다.</li>
-    <li>원자료의 면적 입력 오류 가능성이 큰 {fmt_int(q['area_suspect'])}개 단지는 ㎡당 지표에서 제외했습니다(관리비부과면적÷세대수가 10㎡ 미만 또는 400㎡ 초과). 공용관리비가 0으로 공개된 {fmt_int(q['no_fee'])}개 단지도 ㎡당 값이 없습니다.</li>
+    <li>원자료의 면적 입력 오류 가능성이 큰 {fmt_int(q['area_suspect'])}개 단지(관리비부과면적÷세대수가 10㎡ 미만 또는 400㎡ 초과)와, 부과면적이 주거전용면적보다 작은 구조 오류 단지 {fmt_int(q['struct_suspect'])}개는 ㎡당 지표에서 제외했습니다(면적 오류를 그대로 나누면 ㎡당 값이 몇 배로 부풀려집니다).</li>
+    <li>공용관리비 총액이 세대당 5,000원 미만인 {fmt_int(q['low_fee'])}개 단지도 원자료 입력 오류로 보고 ㎡당 지표에서 제외했습니다(단지 자체는 목록에 남아 있습니다).</li>
+    <li>공용관리비 항목별 표의 ‘수선유지비’는 원자료의 수선유지비(합계)에서 이미 포함된 안전점검비·재해예방비를 빼낸 값이고, 두 항목은 따로 표기합니다. 세부항목이 공개되지 않은 단지분은 ‘미분류’ 행으로 남습니다.</li>
     <li>실거래는 계약일 기준이고 신고 기한이 30일이므로, 최근 월은 신고가 더 들어오면 건수·중간가가 달라집니다.</li>
     <li>평당가는 전용면적 기준이며, 같은 단지·평형이라도 층·향·수리 상태에 따라 달라집니다.</li>
     <li>해제된 거래(해제사유발생일이 있는 건)는 집계에서 제외했습니다.</li>
@@ -602,9 +718,10 @@ def build_privacy(d):
                 '이 사이트의 개인정보 처리와 쿠키 사용 안내.', BASE + '/privacy') + body + foot(d)
 
 
-def build_llms(d):
+def build_llms(d, page_complex_n=0):
     n = d['national']
     regions = d['regions']
+    hist_months = min(12, len([m for m in d['month_coverage'] if m <= d['reference_month']]))
     ranked = [r for r in regions if r['counted'] >= 30 and r['fee_m2'] is not None]
     lowest = sorted(ranked, key=lambda r: r['fee_m2'])[:5]
     highest = sorted(ranked, key=lambda r: -r['fee_m2'])[:5]
@@ -619,14 +736,15 @@ def build_llms(d):
         f"as_of: {d['snapshot_date']} (K-apt 스냅샷 추출일)",
         f"data_month: {d['reference_month']}" + (" (잠정 집계: 공개 진행 중)" if d['provisional'] else ""),
         f"trade_month: {(d.get('trade') or {}).get('reference_month', 'n/a')} (국토교통부 실거래가, 계약일 기준 · 신고 진행 중)", 
-        "units: 관리비 원/㎡·월, 세대당 원/월, 세대수·단지수 개",
+        "units: 관리비 원/㎡·월(관리비부과면적 기준, 전용면적 기준 아님), 세대당 원/월, 세대수·단지수 개",
+        f"coverage: 단지 페이지 {page_complex_n:,}곳 / 집계 단지 {n['complexes']:,}곳 (지역 페이지는 {n['regions']}곳 전부)",
         "license: 공공데이터포털 이용허락범위 제한 없음 (출처: 국토교통부 K-apt)",
         "",
         "## 이 사이트가 답하는 질문",
         "",
         f"- \"수성구 아파트 관리비 평균\" → /region/{next((r['slug'] for r in regions if r['sgg']=='수성구'), 'daegu-suseonggu')} (㎡당 값과 세대당 총관리비)",
         "- \"관리비 싼 지역\" → 아래 '관리비가 낮은 시군구' 표",
-        "- \"○○단지 관리비\" → /complex/{단지코드} (12개월 추이와 항목별 내역)",
+        f"- \"○○단지 관리비\" → /complex/{{단지코드}} (최근 {hist_months}개월 추이와 항목별 내역)",
         "",
         "## 핵심 수치",
         "",
@@ -651,10 +769,11 @@ def build_llms(d):
         "## 데이터 구조",
         "",
         f"- /api/regions.json — 시군구 {len(regions)}곳 요약(단지 수, 세대수, ㎡당·세대당, 항목별 ㎡당, 전월 대비)",
-        "- /api/regions/{slug}.json — 지역 상세 + 단지별 값(단지코드, 세대수, ㎡당, 세대당, 12개월 시계열)",
+        "- /api/regions/{slug}.json — 지역 상세 + 단지별 값(단지코드, 세대수, ㎡당, 세대당, 최근 시계열)",
+        "- /api/search.json — 지역·단지 검색용 이름 목록",
         "- /api/meta.json — 출처(관리비·실거래)·산식·기준월·집계 범위",
         "- /region/{slug} — 사람이 읽는 지역 페이지(정적 HTML, JS 없이 표가 보임)",
-        "- /complex/{code} — 단지 페이지(12개월 추이)",
+        f"- /complex/{{code}} — 단지 페이지(최근 {hist_months}개월 추이)",
         "- /sitemap.xml, /robots.txt — 크롤러용",
         "",
         "## 산식",
@@ -676,10 +795,11 @@ def build_llms(d):
     return '\n'.join(lines)
 
 
-def build_sitemap(urls, lastmod):
+def build_sitemap(pages):
+    """pages: [(url, lastmod)] — lastmod은 페이지 내용이 마지막으로 바뀜 날짜."""
     out = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-    for u in urls:
+    for u, lastmod in pages:
         out.append(f'<url><loc>{u}</loc><lastmod>{lastmod}</lastmod></url>')
     out.append('</urlset>')
     return '\n'.join(out) + '\n'
@@ -764,12 +884,20 @@ table.data .num{font-variant-numeric:tabular-nums}
 footer{max-width:1080px;margin:0 auto;padding:22px 16px 40px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
 footer .small{font-size:11px}
 section.note{background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px 16px 14px;margin-top:26px}
+.search{position:relative;margin:6px 0 2px}
+.search input{width:100%;max-width:420px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px;background:#fff;color:var(--ink)}
+.qres{position:absolute;z-index:5;margin:4px 0 0;padding:0;list-style:none;background:#fff;border:1px solid var(--line);border-radius:10px;max-width:420px;width:100%;box-shadow:0 8px 20px rgba(15,23,42,.08)}
+.qres:empty{display:none}
+.qres li{padding:8px 12px;border-bottom:1px solid var(--line);font-size:14px}
+.qres li:last-child{border-bottom:0}
 """
 
 
 def main():
     d = load()
     d['snapshot_date'] = d.get('snapshot_date', 'unknown')
+    lm_of = Lastmod()
+    pages = []  # (url, lastmod)
 
     # region slug + back-reference
     by_region = {}
@@ -792,24 +920,39 @@ def main():
     page_ids = {c['id'] for c in page_complexes}
 
     urls = [BASE + '/', BASE + '/about', BASE + '/privacy']
+    home_lm = lm_of.of('home', {
+        'national': d['national'], 'trade': d.get('trade'), 'ref': d['reference_month'],
+        'top': [{k: r.get(k) for k in ('slug', 'fee_m2', 'fee_hh', 'households', 'mom_pct')}
+                for r in d['regions'][:50]],
+        'latest': [{k: r.get(k) for k in ('slug', 'fee_m2', 'median_fee_m2')} for r in d['regions'][:10]],
+    })
     with open(os.path.join(SITE, 'index.html'), 'w', encoding='utf-8') as f:
-        f.write(build_index(d))
+        f.write(build_index(d, home_lm))
+    pages.append((BASE + '/', home_lm))
+    about_lm = lm_of.of('about', {'national': d['national'], 'quality': d.get('quality'),
+                                  'snapshot': d['snapshot_date'], 'trade': (d.get('trade') or {}).get('months')})
     with open(os.path.join(SITE, 'about.html'), 'w', encoding='utf-8') as f:
-        f.write(build_about(d))
+        f.write(build_about(d, about_lm))
+    pages.append((BASE + '/about', about_lm))
+    privacy_lm = lm_of.of('privacy', {'v': 1})
     with open(os.path.join(SITE, 'privacy.html'), 'w', encoding='utf-8') as f:
         f.write(build_privacy(d))
+    pages.append((BASE + '/privacy', privacy_lm))
 
     region_by_key = {(r['sido'], r['sgg']): r for r in d['regions']}
     for r in d['regions']:
+        payload = {k: v for k, v in r.items() if not k.startswith('_')}
+        r_lm = lm_of.of('region/' + r['slug'], payload)
         with open(os.path.join(SITE, 'region', f"{r['slug']}.html"), 'w', encoding='utf-8') as f:
-            f.write(build_region(d, r))
-        urls.append(f"{BASE}/region/{r['slug']}")
+            f.write(build_region(d, r, page_ids, r_lm))
+        pages.append((f"{BASE}/region/{r['slug']}", r_lm))
 
     for c in page_complexes:
         r = region_by_key.get((c['sido'], c['sgg']))
+        c_lm = lm_of.of('complex/' + c['id'], {'c': c, 'region_fee': (r or {}).get('fee_m2')})
         with open(os.path.join(SITE, 'complex', f"{c['id']}.html"), 'w', encoding='utf-8') as f:
-            f.write(build_complex(d, c, r))
-        urls.append(f"{BASE}/complex/{c['id']}")
+            f.write(build_complex(d, c, r, c_lm))
+        pages.append((f"{BASE}/complex/{c['id']}", c_lm))
 
     # JSON feeds ---------------------------------------------------------
     def region_public(r):
@@ -875,17 +1018,30 @@ def main():
                    'monthly_rows': sum(d['month_coverage'].values())},
         'month_coverage': d['month_coverage'],
         'definitions': regions_feed['data_notes'],
-        'update': 'K-apt 주 1회 갱신, 이 사이트는 매주 자동 재생성',
+        'update': UPDATE_NOTE,
+        'search': BASE + '/api/search.json',
     }
     with open(os.path.join(SITE, 'api', 'meta.json'), 'w', encoding='utf-8') as f:
         json.dump(meta, f, ensure_ascii=False, indent=1)
 
+    # 검색용 색인: 지역 251 + 단지 페이지 1,500 (이름→URL)
+    search_items = [
+        {'k': f"{r['sido']} {r['sgg']}".strip().lower(), 'n': esc(f"{r['sido']} {r['sgg']}".strip()) + ' 지역',
+         'u': f"/region/{r['slug']}"} for r in d['regions']
+    ] + [
+        {'k': f"{c['name']} {c['sgg']} {c['sido']}".lower(), 'n': esc(c['name']) + f" <span class=\"muted\">{esc(c['sgg'])}</span>",
+         'u': f"/complex/{c['id']}"} for c in page_complexes
+    ]
+    with open(os.path.join(SITE, 'api', 'search.json'), 'w', encoding='utf-8') as f:
+        json.dump(search_items, f, ensure_ascii=False, separators=(',', ':'))
+
     with open(os.path.join(SITE, 'llms.txt'), 'w', encoding='utf-8') as f:
-        f.write(build_llms(d))
+        f.write(build_llms(d, len(page_complexes)))
     with open(os.path.join(SITE, 'robots.txt'), 'w', encoding='utf-8') as f:
         f.write(ROBOTS)
+    lm_of.save()
     with open(os.path.join(SITE, 'sitemap.xml'), 'w', encoding='utf-8') as f:
-        f.write(build_sitemap(urls, d['snapshot_date']))
+        f.write(build_sitemap(pages))
     with open(os.path.join(SITE, 'assets', 'style.css'), 'w', encoding='utf-8') as f:
         f.write(CSS)
     with open(os.path.join(SITE, 'assets', 'favicon.svg'), 'w', encoding='utf-8') as f:
@@ -898,7 +1054,7 @@ def main():
 
     print(f"pages: index, about, privacy, {len(d['regions'])} regions, {len(page_complexes)} complexes")
     print(f"files: {sum(len(files) for _, _, files in os.walk(SITE))}")
-    print(f"urls in sitemap: {len(urls)}")
+    print(f"urls in sitemap: {len(pages)}")
 
 
 if __name__ == '__main__':

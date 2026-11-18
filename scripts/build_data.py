@@ -38,9 +38,15 @@ AREA_FILE = os.path.join(RAW, 'kapt_area.xlsx')
 C_SIDO, C_SGG, C_EUP, C_DONG, C_CODE, C_NAME, C_MONTH = 0, 1, 2, 3, 4, 5, 6
 C_COMMON, C_GENERAL, C_LABOR, C_OFFICE, C_TAX, C_CLOTH, C_EDU, C_CAR, C_OTHER = 7, 8, 9, 10, 11, 12, 13, 14, 15
 C_CLEAN, C_GUARD, C_DISINF, C_ELEV, C_NET, C_REPAIR, C_REPAIR_PURE, C_FACILITY, C_SAFETY, C_DISASTER, C_OUTSRC = 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26
-C_INDIV, C_LASTCHARGE, C_LASTUSE, C_LASTACCR, C_LAST_RATE, C_MISC_INCOME = 27, 44, 45, 46, 47, 48
+# 44='기타', 45='장충금 월부과액', 46='장충금 월사용액', 47='장충금 총적립금액',
+# 48='장충금 적립률', 49='잡수입 월수입금액' (xlsx 헤더 행, 0-based)
+C_INDIV, C_LASTCHARGE, C_LASTUSE, C_LASTACCR, C_LAST_RATE, C_MISC_INCOME = 27, 45, 46, 47, 48, 49
 
 # 공용관리비 합계를 이루는 세부 항목(일반관리비는 인건비·제사무비 등의 소계이므로 넣지 않음)
+# 주의: 안전점검비(24)·재해예방비(25)는 원자료의 수선유지비(합계)(21)에 이미 포함되어 있어
+# 그대로 더하면 이중합산이 된다. build()에서 repair = 수선유지비(합계) - 안전점검비 - 재해예방비로
+# 차감한 뒤 safety·disaster를 따로 표기한다.
+SAFETY_DISASTER_KEYS = ('safety', 'disaster')
 FEE_ITEMS = [
     ('labor', '인건비', C_LABOR),
     ('office', '제사무비', C_OFFICE),
@@ -98,7 +104,7 @@ def load_fees():
     out = defaultdict(dict)
     months = defaultdict(int)
     for i, r in enumerate(rows(FEE_FILE)):
-        if i < 2 or len(r) < 49:
+        if i < 2 or len(r) < 50:  # 49열(잡수입)까지 읽으므로 50칸 필요
             continue
         code = r[C_CODE]
         month = r[C_MONTH]
@@ -109,6 +115,7 @@ def load_fees():
             'general': num(r[C_GENERAL]),
             'indiv': num(r[C_INDIV]),
             'lastcharge': num(r[C_LASTCHARGE]),
+            'lastuse': num(r[C_LASTUSE]),
             'lastaccr': num(r[C_LASTACCR]),
             'last_rate': num(r[C_LAST_RATE]),
             'misc_income': num(r[C_MISC_INCOME]),
@@ -169,7 +176,19 @@ def build():
         # 면적 입력 오류로 보고 ㎡당 지표에서 제외한다(단지 자체는 목록에 남김).
         area_per_hh = (billing / households) if households else None
         area_suspect = area_per_hh is not None and not (10 <= area_per_hh <= 400)
-        usable = (not area_suspect) and billing > 0 and cur['common'] > 0
+        # 구조 오류 가드(값 기준으로 자르지 않음): 부과면적이 전용면적보다 작은 단지는 ㎡당 값이
+        # 몇 배로 부풀려지므로 ㎡당 지표에서 제외한다(5% 여유).
+        exclusive = area['exclusive_area']
+        struct_suspect = exclusive > 0 and billing > 0 and exclusive > billing * 1.05
+        # 공용관리비 총액이 세대당 5,000원 미만인 단지(입력 오류)도 ㎡당 지표에서 제외
+        low_fee = households > 0 and cur['common'] / households < 5000
+        usable = (not area_suspect) and (not struct_suspect) and (not low_fee) and billing > 0 and cur['common'] > 0
+        # 항목별 구성: 원자료의 수선유지비(합계)에 안전점검비·재해예방비가 이미 포함되어
+        # 있으므로 수선유지비에서 차감하고 safety·disaster를 따로 표기한다(이중합산 제거).
+        items = {k: cur[k] for k, _l, _i in FEE_ITEMS}
+        items['repair'] = max(items['repair'] - items['safety'] - items['disaster'], 0.0)
+        items_r = {k: round(v) for k, v in items.items()}
+        unclassified = round(cur['common'] - sum(items_r.values()))  # 세부항목 미공개분
         rec = {
             'id': code,
             'name': area['name'],
@@ -185,7 +204,8 @@ def build():
             'indiv_fee': round(cur['indiv']),
             'last_charge': round(cur['lastcharge']),
             'total_fee': round(cur['common'] + cur['indiv'] + cur['lastcharge']),
-            'items': {k: round(cur[k]) for k, _l, _i in FEE_ITEMS},
+            'items': items_r,
+            'unclassified': unclassified,
             'months': len(fmap),
         }
         if usable:
@@ -195,7 +215,9 @@ def build():
             rec['fee_m2'] = None
             rec['total_m2'] = None
         rec['quality'] = ('ok' if usable else
-                          ('area_suspect' if area_suspect else 'no_fee'))
+                          ('area_suspect' if area_suspect else
+                           ('struct_suspect' if struct_suspect else
+                            ('low_fee' if low_fee else 'no_fee'))))
         if households > 0:
             rec['fee_hh'] = round((cur['common'] + cur['indiv'] + cur['lastcharge']) / households)
         else:
@@ -209,9 +231,10 @@ def build():
             rec['mom_pct'] = None
 
         # monthly 시계열 for the last 12 public months (area-weighted ㎡당 공용관리비)
+        # 잠정월(공개가 막 시작된 다음 달)은 넣지 않는다: 기준월까지만.
         if usable:
             series = {}
-            for m in sorted(fmap)[-12:]:
+            for m in sorted(x for x in fmap if x <= month)[-12:]:
                 series[fmt_month(m)] = round(fmap[m]['common'] / billing, 1)
             rec['series'] = series
         complexes.append(rec)
@@ -234,6 +257,8 @@ def build():
         for key, _label, _idx in FEE_ITEMS:
             s = sum(c['items'][key] for c in counted)
             items[key] = round(s / area_sum, 1) if area_sum else None
+        # 미분류 = 공용관리비 합계 − 세부항목 합 (K-apt가 세부항목을 공개하지 않은 단지분)
+        unclassified = round(sum(c.get('unclassified') or 0 for c in counted) / area_sum, 1) if area_sum else None
         prev_area = 0.0
         prev_common = 0.0
         for c in counted:
@@ -253,6 +278,7 @@ def build():
             'median_fee_m2': med,
             'mom_pct': round((common_sum / area_sum - prev_common / prev_area) / (prev_common / prev_area) * 100, 1) if prev_area and prev_common else None,
             'items': items,
+            'unclassified_m2': unclassified,
         })
     regions.sort(key=lambda r: -(r['households'] or 0))
 
@@ -269,10 +295,8 @@ def build():
 
     quality = {
         'area_suspect': sum(1 for c in complexes if c['quality'] == 'area_suspect'),
-        'no_fee': sum(1 for c in complexes if c['quality'] == 'no_fee'),
-    }
-    quality = {
-        'area_suspect': sum(1 for c in complexes if c['quality'] == 'area_suspect'),
+        'struct_suspect': sum(1 for c in complexes if c['quality'] == 'struct_suspect'),
+        'low_fee': sum(1 for c in complexes if c['quality'] == 'low_fee'),
         'no_fee': sum(1 for c in complexes if c['quality'] == 'no_fee'),
     }
     # ---- 실거래가 (국토교통부 실거래가공개시스템 자료제공 CSV) -----------------

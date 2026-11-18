@@ -11,6 +11,7 @@ import json
 import os
 import re
 import sys
+from collections import defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = os.path.join(ROOT, 'site')
@@ -138,6 +139,38 @@ def main():
             for bad in FORBIDDEN:
                 if bad in t:
                     errors.append(f'forbidden "{bad}" in {os.path.relpath(p, SITE)}')
+
+    # 6b. 내부 링크 전수 존재 검사(크롤러가 밟을 /region/·/complex/ 링크가 404가 되지 않아야 함)
+    link_targets = defaultdict(int)
+    for p in all_files():
+        if not p.endswith('.html'):
+            continue
+        h = read(p)
+        for href in re.findall(r'href="(/region/[^"]+|/complex/[^"]+|/about|/privacy|/llms\.txt|/api/[^"]+)"', h):
+            link_targets[href] += 1
+            rel = href.lstrip('/')
+            target = os.path.join(SITE, rel) if rel else os.path.join(SITE, 'index.html')
+            if not os.path.exists(target) and os.path.exists(target + '.html'):
+                target += '.html'
+            check(os.path.exists(target), f'broken internal link {href} on {os.path.relpath(p, SITE)}')
+    check(len(link_targets) > 0, 'no internal links found')
+
+    # 6c. 홈 검색창 + 검색 색인이 페이지 대상과 일치
+    idx_html = read(os.path.join(SITE, 'index.html'))
+    check('id="q"' in idx_html and '/api/search.json' in idx_html, 'index: 검색창 없음')
+    if os.path.exists(os.path.join(SITE, 'api', 'search.json')):
+        search = json.load(open(os.path.join(SITE, 'api', 'search.json'), encoding='utf-8'))
+        check(len(search) > len(regions), 'search index too small')
+        for it in search[::97]:
+            u = it['u'].replace(BASE, '').lstrip('/')
+            target = os.path.join(SITE, u)
+            check(os.path.exists(target) or os.path.exists(target + '.html'),
+                  f'search entry without page: {it["u"]}')
+    else:
+        check(False, 'missing api/search.json')
+
+    # 6d. 홈 수도권 블록
+    check('수도권' in idx_html, 'index: 수도권 블록 없음')
 
     # 7. sitemap covers the site and every URL has a file
     sm = read(os.path.join(SITE, 'sitemap.xml')).replace('<![CDATA[', '').replace(']]>', '')

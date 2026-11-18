@@ -83,6 +83,46 @@ class QualityGuardTest(unittest.TestCase):
         self.assertTrue(10 <= 43298.2 / 414 <= 400)
 
 
+class LastChargeColumnTest(unittest.TestCase):
+    """P0-1 회귀: 장기수선충당금은 45열(‘장충금 월부과액’)이다. 44열은 ‘기타’."""
+
+    def test_constants_point_at_lastcharge_column(self):
+        self.assertEqual(build_data.C_LASTCHARGE, 45)
+        self.assertEqual(build_data.C_LASTUSE, 46)
+        self.assertEqual(build_data.C_LASTACCR, 47)
+        self.assertEqual(build_data.C_LAST_RATE, 48)
+        self.assertEqual(build_data.C_MISC_INCOME, 49)
+
+    def test_header_matches_constants(self):
+        path = os.path.join(ROOT, 'data', 'raw', 'kapt_fee.xlsx')
+        if not os.path.exists(path):
+            self.skipTest('kapt_fee.xlsx 없음')
+        from xlsx_stream import rows
+        it = rows(path)
+        next(it)
+        header = next(it)
+        self.assertEqual(header[44], '기타')
+        self.assertEqual(header[build_data.C_LASTCHARGE], '장충금 월부과액')
+        self.assertEqual(header[build_data.C_MISC_INCOME], '잡수입 월수입금액')
+
+    def test_fee_hh_includes_last_charge(self):
+        path = os.path.join(ROOT, 'data', 'processed', 'dataset.json')
+        if not os.path.exists(path):
+            self.skipTest('dataset.json 없음')
+        import json
+        d = json.load(open(path, encoding='utf-8'))
+        sampled = [c for c in d['complexes'] if c['last_charge'] > 0 and c['households'] > 0][:50]
+        self.assertTrue(sampled, '장기수선충당금이 반영된 단지가 없음')
+        for c in sampled:
+            expect = (c['common_fee'] + c['indiv_fee'] + c['last_charge']) / c['households']
+            self.assertAlmostEqual(c['fee_hh'], expect, delta=1.5, msg=c['id'])
+        # 전국 세대당 총관리비가 장충금을 빼고 계산되었던 값(약 199,564원)보다 커야 한다
+        counted = [c for c in d['complexes'] if c['fee_m2'] is not None]
+        hh = sum(c['households'] for c in counted)
+        total = sum(c['total_fee'] for c in counted)
+        self.assertGreater(total / hh, 210000)
+
+
 class DatasetInvariantTest(unittest.TestCase):
     """dataset.json이 있으면 페이지가 쓰는 값이 서로 맞는지 확인한다."""
 
@@ -122,11 +162,38 @@ class DatasetInvariantTest(unittest.TestCase):
                 self.assertGreater(t['median_per_pyeong'], 0)
 
     def test_item_sum_matches_common_fee(self):
-        for r in self.d['regions'][:50]:
+        """P1-1 회귀: 항목 합 + 미분류 = 공용관리비(이중합산으로 합이 커지면 안 된다)."""
+        for r in self.d['regions']:
             if not r['fee_m2']:
                 continue
-            total = sum(v for v in r['items'].values() if v)
-            self.assertAlmostEqual(total, r['fee_m2'], delta=max(1.0, r['fee_m2'] * 0.02))
+            total = sum(v for v in r['items'].values() if v) + max(r.get('unclassified_m2') or 0, 0)
+            self.assertAlmostEqual(total, r['fee_m2'], delta=max(1.0, r['fee_m2'] * 0.02),
+                                   msg=f"{r['sido']} {r['sgg']}")
+
+    def test_no_item_double_count_region_wide(self):
+        # 안전점검비·재해예방비를 수선유지비에 또 더했을 때는 항목 합이 합계를 1% 이상 넘는 지역이 있었다.
+        over = [r['sgg'] for r in self.d['regions']
+                if r['fee_m2'] and sum(v for v in r['items'].values() if v) > r['fee_m2'] * 1.01]
+        self.assertEqual(over, [])
+
+    def test_quality_guards_exclude_structural_errors(self):
+        ids = {c['id'] for c in self.d['complexes']}
+        self.assertIn('A10021851', ids)
+        c = next(x for x in self.d['complexes'] if x['id'] == 'A10021851')
+        # 수성풀비체: 부과면적 < 전용면적 -> ㎡당 지표 제외
+        self.assertIsNone(c['fee_m2'])
+        self.assertIn(c['quality'], ('struct_suspect', 'area_suspect'))
+        for c in self.d['complexes']:
+            if c['quality'] == 'ok':
+                self.assertTrue(10 <= c['billing_area'] / c['households'] <= 400)
+                self.assertLessEqual(c['exclusive_area'], c['billing_area'] * 1.05 + 1)
+                self.assertGreaterEqual(c['common_fee'] / c['households'], 5000)
+
+    def test_series_stops_at_reference_month(self):
+        ref = self.d['reference_month']
+        for c in self.d['complexes'][:2000]:
+            for m in (c.get('series') or {}):
+                self.assertLessEqual(m, ref, f'{c["id"]} 시계열에 잠정월 {m} 혼입')
 
 
 if __name__ == '__main__':
