@@ -1,1 +1,17 @@
-{"snapshot_date": "2026-11-13", "files": {"kapt_fee.xlsx": {"board": "21", "fileName": "20261113_단지_관리비정보.xlsx"}, "kapt_area.xlsx": {"board": "20", "fileName": "20261113_단지_면적정보.xlsx"}}}
+{
+ "files": {
+  "kapt_fee.xlsx": {
+   "board": "21",
+   "fileName": "20261113_단지_관리비정보.xlsx",
+   "bytes": 52470603,
+   "title": "K-apt 관리비공개의무단지 관리비정보(2026.11.13.)"
+  },
+  "kapt_area.xlsx": {
+   "board": "20",
+   "fileName": "20261113_단지_면적정보.xlsx",
+   "bytes": 5704030,
+   "title": "K-apt 관리비공개의무단지 면적정보(2026.11.13.)"
+  }
+ },
+ "snapshot_date": "2026-11-13"
+}

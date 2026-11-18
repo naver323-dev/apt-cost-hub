@@ -89,10 +89,22 @@ def fetch_board(op, seq):
 
 def main():
     os.makedirs(RAW, exist_ok=True)
-    op = opener()
     meta = {'files': {}}
     for seq, target in BOARDS:
-        name, blob, title = fetch_board(op, seq)
+        # K-apt는 연속 대용량 다운로드에서 연결을 끊는 경우가 있어 게시글마다 새 세션으로 재시도한다.
+        last = None
+        for attempt in range(3):
+            try:
+                name, blob, title = fetch_board(opener(), seq)
+                last = None
+                break
+            except Exception as e:  # noqa: BLE001
+                last = e
+                wait = 15 * (attempt + 1)
+                print(f'  board {seq} attempt {attempt + 1} failed: {type(e).__name__}: {e} (retry in {wait}s)')
+                time.sleep(wait)
+        if last is not None:
+            raise last
         if len(blob) < 100_000 or not blob.startswith(b'PK'):
             raise SystemExit(f'unexpected payload for board {seq}: {len(blob)} bytes')
         path = os.path.join(RAW, target)
@@ -104,7 +116,7 @@ def main():
             meta['snapshot_date'] = snap
         meta['files'][target] = {'board': seq, 'fileName': name, 'bytes': len(blob), 'title': title}
         print(f'{target}: {name} ({len(blob):,} bytes)')
-        time.sleep(2)
+        time.sleep(10)
     if 'snapshot_date' not in meta:
         raise SystemExit('could not read the snapshot date from the K-apt file name')
     with open(os.path.join(RAW, 'kapt_meta.json'), 'w', encoding='utf-8') as f:

@@ -82,9 +82,14 @@ def main(argv=None):
         n = int(argv[argv.index('--months') + 1])
     os.makedirs(OUT, exist_ok=True)
     wanted = months_back(n)
+    keep_fresh = set(wanted[-2:])  # 최신 2개월은 매번 새로 받고, 나머지는 있으면 건너뛴다
     ok = 0
     for ym in wanted:
         target = os.path.join(OUT, f'apt_{ym}.csv')
+        if ym not in keep_fresh and os.path.exists(target):
+            print(f'{ym}: cached, skip')
+            ok += 1
+            continue
         blob = fetch(ym)
         if blob is None:
             state = 'kept previous' if os.path.exists(target) else 'missing'
