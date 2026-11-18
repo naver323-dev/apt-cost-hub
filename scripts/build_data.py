@@ -13,6 +13,7 @@ combination of two read values (fee / area). Nothing is estimated.
 """
 from __future__ import annotations
 
+import gzip
 import json
 import os
 import sys
@@ -27,6 +28,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW = os.path.join(ROOT, 'data', 'raw')
 COMMITTED = os.path.join(ROOT, 'data', 'committed')
 TRADE_CACHE = os.path.join(COMMITTED, 'trade_cache.json')
+KAPT_CACHE = os.path.join(COMMITTED, 'kapt_cache.json.gz')
 OUT = os.path.join(ROOT, 'data', 'processed')
 
 FEE_FILE = os.path.join(RAW, 'kapt_fee.xlsx')
@@ -269,6 +271,10 @@ def build():
         'area_suspect': sum(1 for c in complexes if c['quality'] == 'area_suspect'),
         'no_fee': sum(1 for c in complexes if c['quality'] == 'no_fee'),
     }
+    quality = {
+        'area_suspect': sum(1 for c in complexes if c['quality'] == 'area_suspect'),
+        'no_fee': sum(1 for c in complexes if c['quality'] == 'no_fee'),
+    }
     # ---- 실거래가 (국토교통부 실거래가공개시스템 자료제공 CSV) -----------------
     region_keys = {(r['sido'], r['sgg']) for r in regions}
     trade = molit.build(region_keys)
@@ -322,19 +328,81 @@ def build():
     return dataset
 
 
+def load_kapt_cache():
+    with gzip.open(KAPT_CACHE, 'rt', encoding='utf-8') as f:
+        return json.load(f)
+
+
+def save_kapt_cache(d):
+    os.makedirs(COMMITTED, exist_ok=True)
+    payload = {k: v for k, v in d.items() if k not in ('trade', 'quality')}
+    with gzip.open(KAPT_CACHE, 'wt', encoding='utf-8', compresslevel=9) as f:
+        json.dump(payload, f, ensure_ascii=False, separators=(',', ':'))
+
+
+def attach_trade(d):
+    """실거래 집계를 붙인다. CSV가 없으면 커밋된 캐시로 대체한다."""
+    regions = d['regions']
+    region_keys = {(r['sido'], r['sgg']) for r in regions}
+    trade = molit.build(region_keys)
+    stale = False
+    if trade is None and os.path.exists(TRADE_CACHE):
+        with open(TRADE_CACHE, encoding='utf-8') as f:
+            cached = json.load(f)
+        trade = {'months': cached['months'], 'national': cached['national'],
+                 'regions': {tuple(k.split('|')): v for k, v in cached['regions'].items()},
+                 'rows': cached['rows'], 'rows_without_kapt_region': cached['rows_unmatched']}
+        stale = True
+    elif trade is not None:
+        os.makedirs(COMMITTED, exist_ok=True)
+        cache = {'months': trade['months'], 'national': trade['national'],
+                 'regions': {f'{k[0]}|{k[1]}': v for k, v in trade['regions'].items()},
+                 'rows': trade['rows'], 'rows_unmatched': trade['rows_without_kapt_region'],
+                 'collected_at': snapshot_date()}
+        with open(TRADE_CACHE, 'w', encoding='utf-8') as f:
+            json.dump(cache, f, ensure_ascii=False, separators=(',', ':'))
+    d['trade'] = None
+    if not trade:
+        return d
+    tmonths = trade['months']
+    tref = tmonths[-1]
+    d['trade'] = {
+        'months': tmonths,
+        'reference_month': tref,
+        'reference_month_label': f'{tref[:4]}년 {int(tref[5:])}월',
+        'national': trade['national'],
+        'rows': trade['rows'],
+        'rows_unmatched': trade['rows_without_kapt_region'],
+        'stale': stale,
+    }
+    for r in regions:
+        r['trade'] = trade['regions'].get((r['sido'], r['sgg']), {})
+    return d
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
-    d = build()
+    have_kapt = os.path.exists(FEE_FILE) and os.path.exists(AREA_FILE)
+    if have_kapt:
+        d = build()
+        save_kapt_cache(d)
+        d['kapt_stale'] = False
+    elif os.path.exists(KAPT_CACHE):
+        # K-apt 접속이 막힌 실행(GitHub Actions 등)에서는 마지막 정상 빌드를 쓴다.
+        d = load_kapt_cache()
+        d['kapt_stale'] = True
+        print('K-apt 원본이 없어 커밋된 관리비 스냅샷을 사용합니다:', d.get('snapshot_date'))
+    else:
+        raise SystemExit('K-apt 원본도 캐시도 없음')
+    d = attach_trade(d)
     with open(os.path.join(OUT, 'dataset.json'), 'w', encoding='utf-8') as f:
         json.dump(d, f, ensure_ascii=False, separators=(',', ':'))
     n = d['national']
-    print(f"reference {d['reference_month']} provisional={d['provisional']} "
-          f"complexes={n['complexes']} regions={n['regions']} households={n['households']:,} "
-          f"national ㎡당 공용관리비={n['fee_m2']}")
-    for r in d['regions'][:12]:
-        print(f"  {r['sido']} {r['sgg']}: {r['complexes']}단지 {r['households']:,}세대 {r['fee_m2']}원/㎡")
-    size = os.path.getsize(os.path.join(OUT, 'dataset.json'))
-    print('dataset.json', round(size / 1e6, 2), 'MB')
+    print(f"reference {d['reference_month']} provisional={d['provisional']} kapt_stale={d['kapt_stale']} "
+          f"complexes={n['complexes']} regions={n['regions']} ㎡당={n['fee_m2']}")
+    t = d.get('trade') or {}
+    print(f"trade {t.get('reference_month')} rows={t.get('rows')} stale={t.get('stale')}")
+    print('dataset.json', round(os.path.getsize(os.path.join(OUT, 'dataset.json')) / 1e6, 2), 'MB')
 
 
 if __name__ == '__main__':

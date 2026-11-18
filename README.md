@@ -7,6 +7,14 @@
 - 저장소: https://github.com/naver323-dev/apt-cost-hub
 - 데이터: 매일 05:30 KST GitHub Actions가 재생성 (`deploy` 브랜치로 배포)
 
+## 자동 갱신 (매일 05:30 KST)
+
+`.github/workflows/daily.yml` — 매일 05:30 KST(UTC 20:30)에 원자료를 다시 받아 사이트를 재생성하고 `deploy` 브랜치로 배포한다.
+
+- K-apt 파일은 한국 밖 러너에서 접속이 막히는 경우가 있다. 이때는 커밋된 `data/committed/kapt_cache.json.gz`(마지막 정상 빌드)로 사이트를 유지하고, 사이트에 "수집 지연" 안내를 띄운다.
+- 실거래 CSV는 `actions/cache`에 남기고 최근 2개월만 새로 받는다. 받지 못하면 `data/committed/trade_cache.json`을 쓴다.
+- 어느 쪽이 실패해도 사이트는 이전 스냅샷으로 계속 서비스된다(빈 화면·오류 페이지 없음).
+
 ## 원자료
 
 | 데이터 | 출처 | 갱신 |

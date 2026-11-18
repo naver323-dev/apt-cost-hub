@@ -278,6 +278,7 @@ def build_index(d):
     {trade_cards}
   </div>
   {'' if not d['provisional'] else '<p class="notice">' + esc(d['reference_month_label']) + ' 관리비는 공개가 진행 중인 잠정 집계입니다. 신고가 끝난 단지만 포함되어 지역 평균이 다소 달라질 수 있습니다.</p>'}
+  {'' if not d.get('kapt_stale') else '<p class="notice">관리비 원본 수집이 지연되어 ' + esc(d['snapshot_date']) + ' 스냅샷을 표시합니다. 다음 자동 갱신에서 최신 공개분으로 교체됩니다.</p>'}
 </section>
 
 <section>
