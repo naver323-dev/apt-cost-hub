@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+data/raw/*.xlsx
+data/raw/molit/*.csv
+data/processed/*.json
+data/private/
+site/
