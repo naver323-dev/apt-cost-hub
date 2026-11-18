@@ -85,7 +85,7 @@ def main():
         check(h.count('<h1') == 1, f'{r["slug"]}: h1 개수 {h.count("<h1")}')
         check('lang="ko"' in h, f'{r["slug"]}: lang 없음')
         check(f'id={GA4}' in h, f'{r["slug"]}: GA4 없음')
-        check(f'{BASE}/region/{r["slug"]}.html' in h, f'{r["slug"]}: canonical 없음')
+        check(f'{BASE}/region/{r["slug"]}"' in h, f'{r["slug"]}: canonical 없음')
         fe = json.load(open(os.path.join(SITE, 'api', 'regions', r['slug'] + '.json'), encoding='utf-8'))
         check(fe['region']['fee_m2'] == r['fee_m2'], f'{r["slug"]}: JSON 값 불일치')
         check(len(fe['complexes']) == len(r['_complexes']) if '_complexes' in r else True,
@@ -148,6 +148,8 @@ def main():
         rel = u.replace(BASE + '/', '')
         rel = '' if rel in ('', '/') else rel
         target = os.path.join(SITE, rel) if rel else os.path.join(SITE, 'index.html')
+        if not os.path.exists(target) and os.path.exists(target + '.html'):
+            target += '.html'
         check(os.path.exists(target), f'sitemap url without file: {u}')
 
     # 8. llms.txt + robots.txt

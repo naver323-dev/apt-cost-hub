@@ -75,7 +75,7 @@ gtag('config', '{GA4_ID}', {{ anonymize_ip: true }});
 <body>
 <header class="top">
   <a class="brand" href="/">{SITE_NAME}</a>
-  <nav><a href="/">지역 순위</a><a href="/about.html">데이터·산식</a></nav>
+  <nav><a href="/">지역 순위</a><a href="/about">데이터·산식</a></nav>
 </header>
 <main>
 """
@@ -85,7 +85,7 @@ def foot(d, extra=''):
     return f"""</main>
 <footer>
   <p>{SNAPSHOT_NOTE} · 기준월 {d['reference_month_label']} · 스냅샷 {d['snapshot_date']}</p>
-  <p><a href="/about.html">데이터 출처·산식·한계</a> · <a href="/llms.txt">llms.txt</a> · <a href="/api/regions.json">JSON API</a> · <a href="/privacy.html">개인정보·쿠키</a></p>
+  <p><a href="/about">데이터 출처·산식·한계</a> · <a href="/llms.txt">llms.txt</a> · <a href="/api/regions.json">JSON API</a> · <a href="/privacy">개인정보·쿠키</a></p>
   <p class="small">이 사이트는 공개된 공공데이터를 집계해 보여줍니다. 개별 단지의 실제 부과액은 관리주체 고지서를 기준으로 하세요.</p>
 </footer>
 {extra}</body>
@@ -124,7 +124,7 @@ def region_table(rows, start=1, link=True, limit=None):
     for i, r in enumerate(rows[:limit] if limit else rows, start=start):
         name = f"{r['sido']} {r['sgg']}".strip()
         if link:
-            name = f'<a href="/region/{r["slug"]}.html">{esc(name)}</a>'
+            name = f'<a href="/region/{r["slug"]}">{esc(name)}</a>'
         out.append(
             f'<tr><td class="n">{i}</td><td>{name}</td>'
             f'<td class="r">{fmt_int(r["complexes"])}</td>'
@@ -235,7 +235,7 @@ def build_index(d):
         ]
     }
     trade_rows = ''.join(
-        f'<tr><td><a href="/region/{r["slug"]}.html">{esc(name)}</a></td>'
+        f'<tr><td><a href="/region/{r["slug"]}">{esc(name)}</a></td>'
         f'<td class="r">{fmt_int(t["count"])}</td>'
         f'<td class="r num">{fmt_price(t["median_price"])}</td>'
         f'<td class="r num">{fmt_dec(t["median_per_pyeong"])}</td></tr>'
@@ -254,7 +254,7 @@ def build_index(d):
     cheap_trade = ''
     if trade_rank:
         rows = ''.join(
-            f'<tr><td><a href="/region/{r["slug"]}.html">{esc(r["sido"])} {esc(r["sgg"])}</a></td>'
+            f'<tr><td><a href="/region/{r["slug"]}">{esc(r["sido"])} {esc(r["sgg"])}</a></td>'
             f'<td class="r num">{fmt_dec(r["trade"][tm]["median_per_pyeong"])}</td>'
             f'<td class="r num">{fmt_price(r["trade"][tm]["median_price"])}</td>'
             f'<td class="r">{fmt_int(r["trade"][tm]["count"])}</td></tr>' for r in trade_rank)
@@ -339,8 +339,8 @@ def build_region(d, r):
          "공용관리비(인건비·청소비·경비비·수선유지비·승강기유지비 등), 개별사용료(전기·수도·난방·가스), 장기수선충당금으로 나뉩니다. 이 페이지의 항목별 표는 공용관리비 항목을 ㎡당으로 보여줍니다."),
     ]
     ld = {"@context": "https://schema.org", "@graph": [
-        {"@type": "WebPage", "@id": f"{BASE}/region/{r['slug']}.html#webpage",
-         "url": f"{BASE}/region/{r['slug']}.html",
+        {"@type": "WebPage", "@id": f"{BASE}/region/{r['slug']}#webpage",
+         "url": f"{BASE}/region/{r['slug']}",
          "name": f"{name} 아파트 관리비 — {d['reference_month_label']}",
          "inLanguage": "ko-KR", "dateModified": d['snapshot_date']},
         {"@type": "Dataset", "name": f"{name} 아파트 관리비 집계",
@@ -352,7 +352,7 @@ def build_region(d, r):
                            "contentUrl": f"{BASE}/api/regions/{r['slug']}.json"}]},
         {"@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "홈", "item": BASE + "/"},
-            {"@type": "ListItem", "position": 2, "name": name, "item": f"{BASE}/region/{r['slug']}.html"}]},
+            {"@type": "ListItem", "position": 2, "name": name, "item": f"{BASE}/region/{r['slug']}"}]},
         {"@type": "FAQPage", "mainEntity": [
             {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]},
     ]}
@@ -365,7 +365,7 @@ def build_region(d, r):
     rows = []
     for c in complexes[:40]:
         rows.append(
-            f'<tr><td><a href="/complex/{c["id"]}.html">{esc(c["name"])}</a></td>'
+            f'<tr><td><a href="/complex/{c["id"]}">{esc(c["name"])}</a></td>'
             f'<td>{esc(c["dong"])}</td>'
             f'<td class="r">{fmt_int(c["households"])}</td>'
             f'<td class="r">{fmt_int(c["dongs"])}</td>'
@@ -400,7 +400,7 @@ def build_region(d, r):
 </section>'''
     siblings = [x for x in sorted(d['regions'], key=lambda x: -(x['households'] or 0))
                 if x['sido'] == r['sido'] and x['slug'] != r['slug']][:8]
-    sib = ' · '.join(f'<a href="/region/{x["slug"]}.html">{esc(x["sgg"])}</a>' for x in siblings)
+    sib = ' · '.join(f'<a href="/region/{x["slug"]}">{esc(x["sgg"])}</a>' for x in siblings)
 
     body = f"""
 <nav class="crumb"><a href="/">홈</a> › <span>{esc(r['sido'])}</span> › <span>{esc(r['sgg'])}</span></nav>
@@ -442,7 +442,7 @@ def build_region(d, r):
 """
     return head(f"{name} 아파트 관리비 — {d['reference_month_label']} ㎡당 {fmt_dec(r['fee_m2'])}원",
                 f"{name} {fmt_int(r['complexes'])}개 단지의 {d['reference_month_label']} 관리비. ㎡당 공용관리비 {fmt_dec(r['fee_m2'])}원, 세대당 총관리비 {fmt_int(r['fee_hh'])}원.",
-                f"{BASE}/region/{r['slug']}.html", ld) + body + foot(d)
+                f"{BASE}/region/{r['slug']}", ld) + body + foot(d)
 
 
 def build_complex(d, c, r):
@@ -461,7 +461,7 @@ def build_complex(d, c, r):
               f'<td class="r num">{fmt_dec(c["fee_m2"])}</td><td class="r num">100.0%</td></tr>')
     prev = c.get('prev_fee_m2')
     ld = {"@context": "https://schema.org", "@graph": [
-        {"@type": "WebPage", "url": f"{BASE}/complex/{c['id']}.html",
+        {"@type": "WebPage", "url": f"{BASE}/complex/{c['id']}",
          "name": f"{name} 관리비 — {d['reference_month_label']}",
          "inLanguage": "ko-KR", "dateModified": d['snapshot_date']},
         {"@type": "Dataset", "name": f"{name} 관리비 시계열",
@@ -472,11 +472,11 @@ def build_complex(d, c, r):
         {"@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "홈", "item": BASE + "/"},
             {"@type": "ListItem", "position": 2, "name": f"{c['sido']} {c['sgg']}",
-             "item": f"{BASE}/region/{r['slug']}.html" if r else BASE + "/"},
-            {"@type": "ListItem", "position": 3, "name": name, "item": f"{BASE}/complex/{c['id']}.html"}]},
+             "item": f"{BASE}/region/{r['slug']}" if r else BASE + "/"},
+            {"@type": "ListItem", "position": 3, "name": name, "item": f"{BASE}/complex/{c['id']}"}]},
     ]}
     body = f"""
-<nav class="crumb"><a href="/">홈</a>{f' › <a href="/region/{r["slug"]}.html">{esc(c["sido"])} {esc(c["sgg"])}</a>' if r else ''} › <span>{esc(name)}</span></nav>
+<nav class="crumb"><a href="/">홈</a>{f' › <a href="/region/{r["slug"]}">{esc(c["sido"])} {esc(c["sgg"])}</a>' if r else ''} › <span>{esc(name)}</span></nav>
 <section class="hero">
   <h1>{esc(name)} 관리비</h1>
   <p class="lead">{esc(c['sido'])} {esc(c['sgg'])} {esc(c['dong'])} · {fmt_int(c['households'])}세대 · {fmt_int(c['dongs'])}개동 · 관리비부과면적 {fmt_int(round(c['billing_area']))}㎡</p>
@@ -511,7 +511,7 @@ def build_complex(d, c, r):
 """
     return head(f"{name} 관리비 — {d['reference_month_label']} ㎡당 {fmt_dec(c['fee_m2'])}원",
                 f"{esc(c['sido'])} {esc(c['sgg'])} {esc(name)}의 {d['reference_month_label']} 관리비. ㎡당 공용관리비 {fmt_dec(c['fee_m2'])}원, 세대당 총관리비 {fmt_int(c['fee_hh'])}원, 최근 {len(series)}개월 추이.",
-                f"{BASE}/complex/{c['id']}.html", ld) + body + foot(d)
+                f"{BASE}/complex/{c['id']}", ld) + body + foot(d)
 
 
 def build_about(d):
@@ -527,7 +527,7 @@ def build_about(d):
          "아니요. 공개된 값을 그대로 쓰고, 계산은 나눗셈·가중평균만 합니다. 공개되지 않은 단지나 월은 비워 둡니다."),
     ]
     ld = {"@context": "https://schema.org", "@graph": [
-        {"@type": "WebPage", "url": BASE + "/about.html", "name": "데이터 출처·산식·한계",
+        {"@type": "WebPage", "url": BASE + "/about", "name": "데이터 출처·산식·한계",
          "inLanguage": "ko-KR", "dateModified": d['snapshot_date']},
         {"@type": "FAQPage", "mainEntity": [
             {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]},
@@ -577,7 +577,7 @@ def build_about(d):
 """
     return head('데이터 출처·산식·한계 | 아파트 관리비 인사이트',
                 'K-apt 공개 자료를 어떻게 집계했는지, 어떤 한계가 있는지 정리했습니다.',
-                BASE + '/about.html', ld) + body + foot(d)
+                BASE + '/about', ld) + body + foot(d)
 
 
 def build_privacy(d):
@@ -593,11 +593,11 @@ def build_privacy(d):
   <h2>쿠키</h2>
   <p>Google Analytics가 방문을 구분하기 위해 쿠키를 사용합니다. 브라우저 설정에서 쿠키를 막아도 사이트의 모든 표와 수치는 그대로 볼 수 있습니다.</p>
   <h2>문의</h2>
-  <p>데이터 오류 제보는 <a href="/about.html">데이터 출처·산식</a> 페이지의 설명을 확인한 뒤 원자료(K-apt)와 대조해 주세요.</p>
+  <p>데이터 오류 제보는 <a href="/about">데이터 출처·산식</a> 페이지의 설명을 확인한 뒤 원자료(K-apt)와 대조해 주세요.</p>
 </section>
 """
     return head('개인정보·쿠키 | 아파트 관리비 인사이트',
-                '이 사이트의 개인정보 처리와 쿠키 사용 안내.', BASE + '/privacy.html') + body + foot(d)
+                '이 사이트의 개인정보 처리와 쿠키 사용 안내.', BASE + '/privacy') + body + foot(d)
 
 
 def build_llms(d):
@@ -622,9 +622,9 @@ def build_llms(d):
         "",
         "## 이 사이트가 답하는 질문",
         "",
-        f"- \"수성구 아파트 관리비 평균\" → /region/{next((r['slug'] for r in regions if r['sgg']=='수성구'), 'daegu-suseonggu')}.html (㎡당 값과 세대당 총관리비)",
+        f"- \"수성구 아파트 관리비 평균\" → /region/{next((r['slug'] for r in regions if r['sgg']=='수성구'), 'daegu-suseonggu')} (㎡당 값과 세대당 총관리비)",
         "- \"관리비 싼 지역\" → 아래 '관리비가 낮은 시군구' 표",
-        "- \"○○단지 관리비\" → /complex/{단지코드}.html (12개월 추이와 항목별 내역)",
+        "- \"○○단지 관리비\" → /complex/{단지코드} (12개월 추이와 항목별 내역)",
         "",
         "## 핵심 수치",
         "",
@@ -651,8 +651,8 @@ def build_llms(d):
         f"- /api/regions.json — 시군구 {len(regions)}곳 요약(단지 수, 세대수, ㎡당·세대당, 항목별 ㎡당, 전월 대비)",
         "- /api/regions/{slug}.json — 지역 상세 + 단지별 값(단지코드, 세대수, ㎡당, 세대당, 12개월 시계열)",
         "- /api/meta.json — 출처(관리비·실거래)·산식·기준월·집계 범위",
-        "- /region/{slug}.html — 사람이 읽는 지역 페이지(정적 HTML, JS 없이 표가 보임)",
-        "- /complex/{code}.html — 단지 페이지(12개월 추이)",
+        "- /region/{slug} — 사람이 읽는 지역 페이지(정적 HTML, JS 없이 표가 보임)",
+        "- /complex/{code} — 단지 페이지(12개월 추이)",
         "- /sitemap.xml, /robots.txt — 크롤러용",
         "",
         "## 산식",
@@ -789,7 +789,7 @@ def main():
     page_complexes = page_complexes[:1500]
     page_ids = {c['id'] for c in page_complexes}
 
-    urls = [BASE + '/', BASE + '/about.html', BASE + '/privacy.html']
+    urls = [BASE + '/', BASE + '/about', BASE + '/privacy']
     with open(os.path.join(SITE, 'index.html'), 'w', encoding='utf-8') as f:
         f.write(build_index(d))
     with open(os.path.join(SITE, 'about.html'), 'w', encoding='utf-8') as f:
@@ -801,13 +801,13 @@ def main():
     for r in d['regions']:
         with open(os.path.join(SITE, 'region', f"{r['slug']}.html"), 'w', encoding='utf-8') as f:
             f.write(build_region(d, r))
-        urls.append(f"{BASE}/region/{r['slug']}.html")
+        urls.append(f"{BASE}/region/{r['slug']}")
 
     for c in page_complexes:
         r = region_by_key.get((c['sido'], c['sgg']))
         with open(os.path.join(SITE, 'complex', f"{c['id']}.html"), 'w', encoding='utf-8') as f:
             f.write(build_complex(d, c, r))
-        urls.append(f"{BASE}/complex/{c['id']}.html")
+        urls.append(f"{BASE}/complex/{c['id']}")
 
     # JSON feeds ---------------------------------------------------------
     def region_public(r):
@@ -838,7 +838,7 @@ def main():
                   'fee_hh': '원/월', 'billing_area': '㎡', 'households': '세대',
                   'trade.median_price': '만원', 'trade.median_per_pyeong': '만원/평', 'trade.count': '건'},
         'national': d['national'],
-        'regions': [dict(region_public(r), slug=r['slug'], url=f"{BASE}/region/{r['slug']}.html") for r in d['regions']],
+        'regions': [dict(region_public(r), slug=r['slug'], url=f"{BASE}/region/{r['slug']}") for r in d['regions']],
         'data_notes': [
             '㎡당 공용관리비 = 공용관리비 합계 / 관리비부과면적',
             '지역 값 = Σ공용관리비 / Σ관리비부과면적 (면적 가중평균)',
