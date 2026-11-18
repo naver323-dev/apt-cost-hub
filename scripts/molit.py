@@ -44,6 +44,9 @@ def split_address(addr: str):
     if len(parts) == 1:
         return sido, ''
     first = parts[1]
+    if first.endswith(('동', '읍', '면', '리', '가')):
+        # 세종특별자치시처럼 시·군·구 없이 동부터 오는 주소
+        return sido, ''
     if first.endswith('시') and len(parts) > 2 and parts[2].endswith('구'):
         return sido, f'{first} {parts[2]}'
     return sido, first
