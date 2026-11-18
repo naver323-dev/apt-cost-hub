@@ -91,6 +91,7 @@ def head(title, desc, canonical, extra_ld=None, og_type='website'):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
+<meta name="naver-site-verification" content="88213cdff6d1e074b13593e218da564f695914d8">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="canonical" href="{canonical}">
 <link rel="alternate" type="text/plain" title="llms.txt" href="/llms.txt">
