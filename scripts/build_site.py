@@ -461,7 +461,7 @@ def build_region(d, r, page_ids=None, lm=None):
               f'<td class="r num">{fmt_dec(r["fee_m2"])}</td><td class="r num">100.0%</td></tr>')
     unclass = r.get('unclassified_m2') or 0
     unclass_row = ''
-    if unclass > 0:
+    if unclass > 0.5:
         unclass_row = (f'<tr class="total"><td>미분류(세부항목 미공개)</td>'
                        f'<td class="r num">{fmt_dec(unclass)}</td>'
                        f'<td class="r num">{fmt_dec(unclass / r["fee_m2"] * 100, 1)}%</td></tr>')
@@ -567,7 +567,7 @@ def build_complex(d, c, r, lm=None):
     items += (f'<tr class="total"><td>공용관리비 합계</td>'
               f'<td class="r num">{fmt_dec(c["fee_m2"])}</td><td class="r num">100.0%</td></tr>')
     unclass = c.get('unclassified') or 0
-    if unclass > 0 and c['common_fee']:
+    if unclass > 0 and c['common_fee'] and unclass / c['common_fee'] >= 0.001:
         items += (f'<tr class="total"><td>미분류(세부항목 미공개)</td>'
                   f'<td class="r num">{fmt_dec(unclass / c["billing_area"])}</td>'
                   f'<td class="r num">{fmt_dec(unclass / c["common_fee"] * 100, 1)}%</td></tr>')
