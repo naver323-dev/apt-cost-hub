@@ -335,7 +335,7 @@ def load_kapt_cache():
 
 def save_kapt_cache(d):
     os.makedirs(COMMITTED, exist_ok=True)
-    payload = {k: v for k, v in d.items() if k not in ('trade', 'quality')}
+    payload = {k: v for k, v in d.items() if k != 'trade'}
     with gzip.open(KAPT_CACHE, 'wt', encoding='utf-8', compresslevel=9) as f:
         json.dump(payload, f, ensure_ascii=False, separators=(',', ':'))
 

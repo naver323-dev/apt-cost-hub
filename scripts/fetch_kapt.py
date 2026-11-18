@@ -113,4 +113,11 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except SystemExit:
+        raise
+    except Exception as e:  # noqa: BLE001 - 어떤 실패든 빌드는 커밋된 스냅샷으로 진행
+        print(f'K-apt 수집 실패: {type(e).__name__}: {e}')
+        print('빌드는 커밋된 data/committed/kapt_cache.json.gz 스냅샷으로 계속합니다.')
+        sys.exit(0)
