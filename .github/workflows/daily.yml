@@ -38,8 +38,9 @@ jobs:
           restore-keys: |
             molit-csv-
 
-      - name: Fetch K-apt weekly files
+      - name: Fetch K-apt weekly files (실패 시 커밋된 스냅샷으로 빌드)
         run: python3 scripts/fetch_kapt.py
+        continue-on-error: true
 
       - name: Fetch 실거래가 CSV (최근 2개월, 실패해도 기존 파일 유지)
         run: python3 scripts/fetch_molit.py --months 2
