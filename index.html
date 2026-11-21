@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전국 아파트 관리비·실거래가 — 2026년 9월 시군구별 비교</title>
+<meta name="description" content="2026년 9월 K-apt 관리비와 2026년 10월 실거래를 전국 19,345개 단지·251개 시군구로 정리했습니다.">
+<meta name="naver-site-verification" content="88213cdff6d1e074b13593e218da564f695914d8">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://apt-cost-hub.pages.dev/">
+<link rel="alternate" type="text/plain" title="llms.txt" href="/llms.txt">
+<link rel="alternate" type="application/json" title="API" href="/api/regions.json">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="아파트 관리비 인사이트">
+<meta property="og:title" content="전국 아파트 관리비·실거래가 — 2026년 9월 시군구별 비교">
+<meta property="og:description" content="2026년 9월 K-apt 관리비와 2026년 10월 실거래를 전국 19,345개 단지·251개 시군구로 정리했습니다.">
+<meta property="og:url" content="https://apt-cost-hub.pages.dev/">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#0f172a">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css?v=1">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-J80R3CFWY8"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-J80R3CFWY8', { anonymize_ip: true });
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "WebSite",
+   "@id": "https://apt-cost-hub.pages.dev/#website",
+   "url": "https://apt-cost-hub.pages.dev/",
+   "name": "아파트 관리비 인사이트",
+   "inLanguage": "ko-KR",
+   "description": "전국 아파트 단지·시군구별 관리비(㎡당)와 아파트 매매 실거래 통계"
+  },
+  {
+   "@type": "WebPage",
+   "@id": "https://apt-cost-hub.pages.dev/#webpage",
+   "url": "https://apt-cost-hub.pages.dev/",
+   "name": "전국 아파트 관리비·실거래가 순위 (2026년 9월 기준)",
+   "inLanguage": "ko-KR",
+   "isPartOf": {
+    "@id": "https://apt-cost-hub.pages.dev/#website"
+   },
+   "dateModified": "2026-11-21"
+  },
+  {
+   "@type": "Dataset",
+   "@id": "https://apt-cost-hub.pages.dev/#dataset",
+   "name": "전국 공동주택 관리비·아파트 매매 실거래 집계",
+   "description": "K-apt 관리비공개의무단지 공개 자료와 국토교통부 실거래가공개시스템 자료를 시군구 단위로 집계한 통계. 관리비 기준월 2026년 9월, 실거래 기준월 2026년 10월.",
+   "temporalCoverage": "2026-09-01/2026-10-28",
+   "dateModified": "2026-11-21",
+   "creator": {
+    "@type": "Organization",
+    "name": "아파트 관리비 인사이트 (K-apt·국토교통부 공개 자료 집계)"
+   },
+   "isBasedOn": [
+    "https://www.data.go.kr/data/3039714/fileData.do",
+    "https://rt.molit.go.kr/"
+   ],
+   "license": "https://www.data.go.kr/ugs/selectPortalPolicyView.do",
+   "variableMeasured": [
+    "㎡당 공용관리비(원/㎡·월)",
+    "세대당 총관리비(원/월)",
+    "아파트 매매 거래 건수",
+    "중간 매매가(만원)",
+    "평당가(만원/평)"
+   ],
+   "distribution": [
+    {
+     "@type": "DataDownload",
+     "encodingFormat": "application/json",
+     "contentUrl": "https://apt-cost-hub.pages.dev/api/regions.json"
+    },
+    {
+     "@type": "DataDownload",
+     "encodingFormat": "text/plain",
+     "contentUrl": "https://apt-cost-hub.pages.dev/llms.txt"
+    }
+   ]
+  },
+  {
+   "@type": "FAQPage",
+   "@id": "https://apt-cost-hub.pages.dev/#faq",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "이 사이트의 관리비 숫자는 어디서 오나요?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "K-apt(공동주택관리정보시스템)가 주 1회 공개하는 ‘관리비공개의무단지 관리비정보’ 파일과 ‘면적정보’ 파일을 그대로 집계했습니다. 이번 스냅샷은 2026-11-20 추출본이고, 기준월은 2026년 9월입니다."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "실거래가는 어떻게 집계했나요?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "국토교통부 실거래가공개시스템의 자료제공 CSV(아파트 매매, 계약일 기준)를 받아 시군구별로 집계했습니다. 해제된 거래는 빼고, 거래 건수·중간 거래금액·중간 평당가를 계산합니다. 이번 기준월은 2026년 10월입니다."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "㎡당 공용관리비는 어떻게 계산하나요?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "단지별 ‘공용관리비 합계’를 그 단지의 ‘관리비부과면적(㎡)’으로 나눈 값입니다. 지역 값은 단지별 값을 면적(관리비부과면적)으로 가중평균했습니다. 현재 전국 가중평균은 1,028.3원/㎡입니다."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "평당가는 어떻게 계산하나요?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "거래 1건마다 ‘거래금액 ÷ 전용면적 × 3.305785’로 평당 금액을 구한 뒤, 그 지역 거래들의 중간값을 씁니다. 평균 대신 중간값을 쓰는 이유는 고가 거래 한 건이 지역 값을 끌고 가지 않게 하기 위해서입니다."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "세대당 총관리비는 무엇을 더한 값인가요?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "공용관리비 + 개별사용료(전기·수도·난방 등) + 장기수선충당금 월부과액을 더해 세대수로 나눈 값입니다. 개별사용료는 사용량에 따라 달라지므로 지역 비교에는 ㎡당 공용관리비를 권합니다."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "왜 우리 단지가 보이지 않나요?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "K-apt 관리비 공개는 300세대 이상, 150세대 이상이면서 승강기 또는 중앙난방이 있는 단지 등 ‘관리비 공개의무단지’가 대상입니다. 이 기준에 들지 않거나 해당 월 공개가 없는 단지는 표에 나오지 않습니다. 이번 기준월 집계 단지는 19,345곳입니다."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "관리비가 가장 싼 지역은 어디인가요?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "단지 30곳 이상이 집계된 지역 가운데 경상북도 포항북구가 ㎡당 789.6원으로 가장 낮았습니다. 다음은 전남광주통합특별시 광양시(805.4원), 전남광주통합특별시 나주시(826.1원) 순입니다."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "얼마나 자주 갱신되나요?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "관리비는 K-apt 파일이 주 1회 갱신되고, 실거래가는 매일, 이 사이트는 매일 05:30(KST)에 자동으로 다시 만들어집니다."
+     }
+    }
+   ]
+  }
+ ]
+}
+</script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/">아파트 관리비 인사이트</a>
+  <nav><a href="/">지역 순위</a><a href="/about">데이터·산식</a></nav>
+</header>
+<main>
+
+<section class="hero">
+  <h1>전국 아파트 관리비·실거래가, 지역별로 한눈에</h1>
+  <p class="lead">실거래 2026년 10월 · 관리비 2026년 9월 · 국토교통부·K-apt 공개 자료 집계 · 251개 시군구 · 19,345개 단지</p>
+  <div class="search"><input id="q" type="search" autocomplete="off" placeholder="시군구·단지 검색 (예: 수성구, 한남더힐)" aria-label="시군구·단지 검색"><ul id="qr" class="qres"></ul></div>
+  <div class="cards">
+    <div class="card"><span>전국 아파트 매매 거래</span><strong>40,484<small>건</small></strong></div><div class="card"><span>중간 매매가 · 평당가</span><strong>3억 7,000만원</strong><span class="sub2">평당 1,633.7만원 · 2026년 10월</span></div>
+    <div class="card"><span>전국 ㎡당 공용관리비</span><strong>1,028.3<small>원/㎡·월</small></strong></div>
+    <div class="card"><span>집계 단지</span><strong>19,345<small>곳</small></strong></div>
+    <div class="card"><span>집계 세대</span><strong>11,155,005<small>세대</small></strong></div>
+  </div>
+  <p class="notice">2026년 9월 관리비는 공개가 진행 중인 잠정 집계입니다. 신고가 끝난 단지만 포함되어 지역 평균이 다소 달라질 수 있습니다.</p>
+  
+</section>
+
+
+<section>
+  <h2>아파트 매매 실거래 · 세대수 상위 50개 시군구</h2>
+  <p class="sub">2026년 10월 계약분 · 건수 40,484건(전국) · 중간 매매가 3억 7,000만원 · 중간 평당가 1,633.7만원. 신고 기한이 30일이라 최근 월은 잠정치입니다.</p>
+  <div class="tablewrap"><table class="data"><thead><tr>
+    <th>지역</th><th class="r">거래 건수</th><th class="r">중간 매매가</th><th class="r">평당가(만원)</th>
+  </tr></thead><tbody><tr><td><a href="/region/gyeonggi-namyangjusi">경기도 남양주시</a></td><td class="r">734</td><td class="r num">4억 6,350만원</td><td class="r num">1,867.8</td></tr><tr><td><a href="/region/gyeonggi-pyeongtaeksi">경기도 평택시</a></td><td class="r">707</td><td class="r num">3억 3,000만원</td><td class="r num">1,447.0</td></tr><tr><td><a href="/region/gyeongnam-gimhaesi">경상남도 김해시</a></td><td class="r">557</td><td class="r num">2억 3,000만원</td><td class="r num">888.5</td></tr><tr><td><a href="/region/daegu-dalseogu">대구광역시 달서구</a></td><td class="r">410</td><td class="r num">2억 8,450만원</td><td class="r num">1,072.0</td></tr><tr><td><a href="/region/seoul-nowongu">서울특별시 노원구</a></td><td class="r">475</td><td class="r num">6억 7,000만원</td><td class="r num">3,840.1</td></tr><tr><td><a href="/region/gyeonggi-siheungsi">경기도 시흥시</a></td><td class="r">516</td><td class="r num">4억 2,700만원</td><td class="r num">1,881.5</td></tr><tr><td><a href="/region/gyeonggi-gimposi">경기도 김포시</a></td><td class="r">448</td><td class="r num">4억 4,700만원</td><td class="r num">1,824.5</td></tr><tr><td><a href="/region/gyeonggi-pajusi">경기도 파주시</a></td><td class="r">396</td><td class="r num">3억 8,600만원</td><td class="r num">1,517.8</td></tr><tr><td><a href="/region/gyeonggi-hwaseongdongtangu">경기도 화성동탄구</a></td><td class="r">363</td><td class="r num">8억 3,000만원</td><td class="r num">3,554.3</td></tr><tr><td><a href="/region/jeonnamgwangju-bukgu">전남광주통합특별시 북구</a></td><td class="r">385</td><td class="r num">2억 2,500만원</td><td class="r num">950.1</td></tr><tr><td><a href="/region/gyeonggi-uijeongbusi">경기도 의정부시</a></td><td class="r">511</td><td class="r num">3억 4,500만원</td><td class="r num">1,540.7</td></tr><tr><td><a href="/region/gyeonggi-goyangdeokyanggu">경기도 고양덕양구</a></td><td class="r">498</td><td class="r num">5억 6,250만원</td><td class="r num">2,279.9</td></tr><tr><td><a href="/region/incheon-yeonsugu">인천광역시 연수구</a></td><td class="r">418</td><td class="r num">6억 4,250만원</td><td class="r num">2,518.1</td></tr><tr><td><a href="/region/chungnam-cheonanseobukgu">충청남도 천안서북구</a></td><td class="r">494</td><td class="r num">2억 4,500만원</td><td class="r num">1,064.9</td></tr><tr><td><a href="/region/gyeonggi-seongnambundanggu">경기도 성남분당구</a></td><td class="r">246</td><td class="r num">16억원</td><td class="r num">7,525.8</td></tr><tr><td><a href="/region/jeonnamgwangju-gwangsangu">전남광주통합특별시 광산구</a></td><td class="r">311</td><td class="r num">2억 6,200만원</td><td class="r num">1,106.6</td></tr><tr><td><a href="/region/sejong-area">세종특별자치시</a></td><td class="r">683</td><td class="r num">5억 1,000만원</td><td class="r num">2,320.8</td></tr><tr><td><a href="/region/gyeongnam-yangsansi">경상남도 양산시</a></td><td class="r">408</td><td class="r num">2억 6,250만원</td><td class="r num">1,177.4</td></tr><tr><td><a href="/region/gyeonggi-yongingiheunggu">경기도 용인기흥구</a></td><td class="r">376</td><td class="r num">6억 2,500만원</td><td class="r num">2,214.8</td></tr><tr><td><a href="/region/chungnam-asansi">충청남도 아산시</a></td><td class="r">540</td><td class="r num">2억 3,500만원</td><td class="r num">1,050.5</td></tr><tr><td><a href="/region/daejeon-seogu">대전광역시 서구</a></td><td class="r">479</td><td class="r num">4억원</td><td class="r num">1,769.8</td></tr><tr><td><a href="/region/seoul-songpagu">서울특별시 송파구</a></td><td class="r">231</td><td class="r num">19억 9,000만원</td><td class="r num">8,968.1</td></tr><tr><td><a href="/region/incheon-namdonggu">인천광역시 남동구</a></td><td class="r">341</td><td class="r num">3억 6,500만원</td><td class="r num">1,580.7</td></tr><tr><td><a href="/region/gangwon-wonjusi">강원특별자치도 원주시</a></td><td class="r">455</td><td class="r num">2억 2,000만원</td><td class="r num">916.3</td></tr><tr><td><a href="/region/daegu-bukgu">대구광역시 북구</a></td><td class="r">345</td><td class="r num">2억 3,500만원</td><td class="r num">1,062.4</td></tr><tr><td><a href="/region/seoul-gangnamgu">서울특별시 강남구</a></td><td class="r">155</td><td class="r num">29억 2,000만원</td><td class="r num">13,038.3</td></tr><tr><td><a href="/region/incheon-bupyeonggu">인천광역시 부평구</a></td><td class="r">510</td><td class="r num">3억 8,500만원</td><td class="r num">1,881.1</td></tr><tr><td><a href="/region/daejeon-yuseonggu">대전광역시 유성구</a></td><td class="r">448</td><td class="r num">4억 4,150만원</td><td class="r num">1,767.5</td></tr><tr><td><a href="/region/busan-haeundaegu">부산광역시 해운대구</a></td><td class="r">335</td><td class="r num">4억 1,500만원</td><td class="r num">2,042.0</td></tr><tr><td><a href="/region/gyeonggi-yonginsujigu">경기도 용인수지구</a></td><td class="r">477</td><td class="r num">10억원</td><td class="r num">4,052.7</td></tr><tr><td><a href="/region/gyeongbuk-gumisi">경상북도 구미시</a></td><td class="r">457</td><td class="r num">1억 7,200만원</td><td class="r num">740.2</td></tr><tr><td><a href="/region/daegu-suseonggu">대구광역시 수성구</a></td><td class="r">320</td><td class="r num">5억 2,350만원</td><td class="r num">1,899.9</td></tr><tr><td><a href="/region/gyeonggi-yangjusi">경기도 양주시</a></td><td class="r">294</td><td class="r num">3억 1,875만원</td><td class="r num">1,354.2</td></tr><tr><td><a href="/region/gyeonggi-suwonyeongtonggu">경기도 수원영통구</a></td><td class="r">591</td><td class="r num">6억 9,000만원</td><td class="r num">3,296.5</td></tr><tr><td><a href="/region/seoul-gangseogu">서울특별시 강서구</a></td><td class="r">263</td><td class="r num">10억 1,500만원</td><td class="r num">4,950.1</td></tr><tr><td><a href="/region/seoul-gangdonggu">서울특별시 강동구</a></td><td class="r">191</td><td class="r num">14억 2,500만원</td><td class="r num">6,011.5</td></tr><tr><td><a href="/region/jeonnamgwangju-seogu">전남광주통합특별시 서구</a></td><td class="r">285</td><td class="r num">2억 700만원</td><td class="r num">972.4</td></tr><tr><td><a href="/region/gyeonggi-suwongwonseongu">경기도 수원권선구</a></td><td class="r">484</td><td class="r num">5억원</td><td class="r num">2,219.8</td></tr><tr><td><a href="/region/daegu-donggu">대구광역시 동구</a></td><td class="r">262</td><td class="r num">3억 3,800만원</td><td class="r num">1,375.4</td></tr><tr><td><a href="/region/gyeonggi-hanamsi">경기도 하남시</a></td><td class="r">262</td><td class="r num">11억 5,500만원</td><td class="r num">4,988.1</td></tr><tr><td><a href="/region/incheon-geomdangu">인천광역시 검단구</a></td><td class="r">327</td><td class="r num">5억원</td><td class="r num">1,988.8</td></tr><tr><td><a href="/region/gyeongbuk-pohangbukgu">경상북도 포항북구</a></td><td class="r">224</td><td class="r num">1억 9,800만원</td><td class="r num">782.5</td></tr><tr><td><a href="/region/jeonbuk-jeonjuwansangu">전북특별자치도 전주완산구</a></td><td class="r">371</td><td class="r num">1억 8,700만원</td><td class="r num">943.9</td></tr><tr><td><a href="/region/daegu-dalseonggun">대구광역시 달성군</a></td><td class="r">229</td><td class="r num">2억 2,800만원</td><td class="r num">1,046.7</td></tr><tr><td><a href="/region/busan-busanjingu">부산광역시 부산진구</a></td><td class="r">357</td><td class="r num">3억 1,800만원</td><td class="r num">1,519.3</td></tr><tr><td><a href="/region/chungbuk-cheongjuheungdeokgu">충청북도 청주흥덕구</a></td><td class="r">272</td><td class="r num">2억 7,000만원</td><td class="r num">1,198.0</td></tr><tr><td><a href="/region/jeonbuk-jeonjudeokjingu">전북특별자치도 전주덕진구</a></td><td class="r">325</td><td class="r num">2억 3,000만원</td><td class="r num">1,027.7</td></tr><tr><td><a href="/region/jeonnamgwangju-suncheonsi">전남광주통합특별시 순천시</a></td><td class="r">296</td><td class="r num">2억 1,150만원</td><td class="r num">826.6</td></tr><tr><td><a href="/region/gyeonggi-goyangilsanseogu">경기도 고양일산서구</a></td><td class="r">307</td><td class="r num">3억 7,700만원</td><td class="r num">1,672.1</td></tr><tr><td><a href="/region/gyeonggi-osansi">경기도 오산시</a></td><td class="r">416</td><td class="r num">3억 7,400만원</td><td class="r num">1,562.3</td></tr></tbody></table></div>
+</section>
+
+
+<section>
+  <h2>수도권(서울·경기·인천) 주요 시군구</h2>
+  <p class="sub">세대수 상위 12곳. 실거래는 2026년 10월 계약분, 관리비는 2026년 9월 기준입니다.</p>
+  <div class="tablewrap"><table class="data"><thead><tr>
+    <th>지역</th><th class="r">거래 건수</th><th class="r">중간 매매가</th><th class="r">평당가(만원)</th>
+    <th class="r">㎡당 관리비</th><th class="r">세대당 총관리비</th>
+  </tr></thead><tbody><tr><td><a href="/region/gyeonggi-namyangjusi">남양주시</a></td><td class="r">734</td><td class="r num">4억 6,350만원</td><td class="r num">1,867.8</td><td class="r num">1,034.8</td><td class="r num">235,292</td></tr><tr><td><a href="/region/gyeonggi-pyeongtaeksi">평택시</a></td><td class="r">707</td><td class="r num">3억 3,000만원</td><td class="r num">1,447.0</td><td class="r num">1,046.6</td><td class="r num">220,999</td></tr><tr><td><a href="/region/seoul-nowongu">노원구</a></td><td class="r">475</td><td class="r num">6억 7,000만원</td><td class="r num">3,840.1</td><td class="r num">1,315.7</td><td class="r num">194,060</td></tr><tr><td><a href="/region/gyeonggi-siheungsi">시흥시</a></td><td class="r">516</td><td class="r num">4억 2,700만원</td><td class="r num">1,881.5</td><td class="r num">1,027.8</td><td class="r num">234,362</td></tr><tr><td><a href="/region/gyeonggi-gimposi">김포시</a></td><td class="r">448</td><td class="r num">4억 4,700만원</td><td class="r num">1,824.5</td><td class="r num">1,033.5</td><td class="r num">244,008</td></tr><tr><td><a href="/region/gyeonggi-pajusi">파주시</a></td><td class="r">396</td><td class="r num">3억 8,600만원</td><td class="r num">1,517.8</td><td class="r num">942.5</td><td class="r num">228,984</td></tr><tr><td><a href="/region/gyeonggi-hwaseongdongtangu">화성동탄구</a></td><td class="r">363</td><td class="r num">8억 3,000만원</td><td class="r num">3,554.3</td><td class="r num">1,055.9</td><td class="r num">267,071</td></tr><tr><td><a href="/region/gyeonggi-uijeongbusi">의정부시</a></td><td class="r">511</td><td class="r num">3억 4,500만원</td><td class="r num">1,540.7</td><td class="r num">1,032.2</td><td class="r num">213,936</td></tr><tr><td><a href="/region/gyeonggi-goyangdeokyanggu">고양덕양구</a></td><td class="r">498</td><td class="r num">5억 6,250만원</td><td class="r num">2,279.9</td><td class="r num">1,042.2</td><td class="r num">229,552</td></tr><tr><td><a href="/region/incheon-yeonsugu">연수구</a></td><td class="r">418</td><td class="r num">6억 4,250만원</td><td class="r num">2,518.1</td><td class="r num">1,098.6</td><td class="r num">275,613</td></tr><tr><td><a href="/region/gyeonggi-seongnambundanggu">성남분당구</a></td><td class="r">246</td><td class="r num">16억원</td><td class="r num">7,525.8</td><td class="r num">1,232.4</td><td class="r num">295,200</td></tr><tr><td><a href="/region/gyeonggi-yongingiheunggu">용인기흥구</a></td><td class="r">376</td><td class="r num">6억 2,500만원</td><td class="r num">2,214.8</td><td class="r num">1,059.1</td><td class="r num">278,429</td></tr></tbody></table></div>
+</section>
+
+<section>
+  <h2>세대수 상위 50개 시군구 관리비</h2>
+  <p class="sub">세대수가 많은 순입니다. ㎡당 공용관리비는 면적 가중평균, 세대당 총관리비는 공용관리비+개별사용료+장기수선충당금 기준입니다.</p>
+  <div class="tablewrap"><table class="data"><thead><tr><th class="n">#</th><th>지역</th><th class="r">단지</th><th class="r">세대</th><th class="r">㎡당 공용관리비</th><th class="r">세대당 총관리비</th><th class="r">전월</th></tr></thead><tbody>
+<tr><td class="n">1</td><td><a href="/region/gyeonggi-namyangjusi">경기도 남양주시</a></td><td class="r">311</td><td class="r">193,803</td><td class="r num"><strong>1,034.8</strong></td><td class="r num">235,292</td><td class="r"><span class="mom up">▲ 0.8%</span></td></tr>
+<tr><td class="n">2</td><td><a href="/region/gyeonggi-pyeongtaeksi">경기도 평택시</a></td><td class="r">277</td><td class="r">170,865</td><td class="r num"><strong>1,046.6</strong></td><td class="r num">220,999</td><td class="r"><span class="mom up">▲ 1.0%</span></td></tr>
+<tr><td class="n">3</td><td><a href="/region/gyeongnam-gimhaesi">경상남도 김해시</a></td><td class="r">225</td><td class="r">148,317</td><td class="r num"><strong>939.1</strong></td><td class="r num">209,376</td><td class="r"><span class="mom up">▲ 1.5%</span></td></tr>
+<tr><td class="n">4</td><td><a href="/region/daegu-dalseogu">대구광역시 달서구</a></td><td class="r">212</td><td class="r">143,201</td><td class="r num"><strong>954.8</strong></td><td class="r num">216,151</td><td class="r"><span class="mom up">▲ 2.1%</span></td></tr>
+<tr><td class="n">5</td><td><a href="/region/seoul-nowongu">서울특별시 노원구</a></td><td class="r">199</td><td class="r">143,182</td><td class="r num"><strong>1,315.7</strong></td><td class="r num">194,060</td><td class="r"><span class="mom up">▲ 1.4%</span></td></tr>
+<tr><td class="n">6</td><td><a href="/region/gyeonggi-siheungsi">경기도 시흥시</a></td><td class="r">234</td><td class="r">142,130</td><td class="r num"><strong>1,027.8</strong></td><td class="r num">234,362</td><td class="r"><span class="mom up">▲ 1.2%</span></td></tr>
+<tr><td class="n">7</td><td><a href="/region/gyeonggi-gimposi">경기도 김포시</a></td><td class="r">186</td><td class="r">139,791</td><td class="r num"><strong>1,033.5</strong></td><td class="r num">244,008</td><td class="r"><span class="mom up">▲ 0.8%</span></td></tr>
+<tr><td class="n">8</td><td><a href="/region/gyeonggi-pajusi">경기도 파주시</a></td><td class="r">184</td><td class="r">138,258</td><td class="r num"><strong>942.5</strong></td><td class="r num">228,984</td><td class="r"><span class="mom up">▲ 0.3%</span></td></tr>
+<tr><td class="n">9</td><td><a href="/region/gyeonggi-hwaseongdongtangu">경기도 화성동탄구</a></td><td class="r">169</td><td class="r">130,208</td><td class="r num"><strong>1,055.9</strong></td><td class="r num">267,071</td><td class="r"><span class="mom up">▲ 1.2%</span></td></tr>
+<tr><td class="n">10</td><td><a href="/region/jeonnamgwangju-bukgu">전남광주통합특별시 북구</a></td><td class="r">243</td><td class="r">127,435</td><td class="r num"><strong>870.0</strong></td><td class="r num">188,689</td><td class="r"><span class="mom up">▲ 3.0%</span></td></tr>
+<tr><td class="n">11</td><td><a href="/region/gyeonggi-uijeongbusi">경기도 의정부시</a></td><td class="r">218</td><td class="r">124,551</td><td class="r num"><strong>1,032.2</strong></td><td class="r num">213,936</td><td class="r"><span class="mom up">▲ 0.7%</span></td></tr>
+<tr><td class="n">12</td><td><a href="/region/gyeonggi-goyangdeokyanggu">경기도 고양덕양구</a></td><td class="r">180</td><td class="r">124,427</td><td class="r num"><strong>1,042.2</strong></td><td class="r num">229,552</td><td class="r"><span class="mom up">▲ 1.1%</span></td></tr>
+<tr><td class="n">13</td><td><a href="/region/incheon-yeonsugu">인천광역시 연수구</a></td><td class="r">165</td><td class="r">124,074</td><td class="r num"><strong>1,098.6</strong></td><td class="r num">275,613</td><td class="r"><span class="mom up">▲ 1.1%</span></td></tr>
+<tr><td class="n">14</td><td><a href="/region/chungnam-cheonanseobukgu">충청남도 천안서북구</a></td><td class="r">218</td><td class="r">122,819</td><td class="r num"><strong>1,014.7</strong></td><td class="r num">215,705</td><td class="r"><span class="mom up">▲ 0.9%</span></td></tr>
+<tr><td class="n">15</td><td><a href="/region/gyeonggi-seongnambundanggu">경기도 성남분당구</a></td><td class="r">190</td><td class="r">122,734</td><td class="r num"><strong>1,232.4</strong></td><td class="r num">295,200</td><td class="r"><span class="mom up">▲ 1.3%</span></td></tr>
+<tr><td class="n">16</td><td><a href="/region/jeonnamgwangju-gwangsangu">전남광주통합특별시 광산구</a></td><td class="r">239</td><td class="r">122,067</td><td class="r num"><strong>890.6</strong></td><td class="r num">204,801</td><td class="r"><span class="mom up">▲ 2.5%</span></td></tr>
+<tr><td class="n">17</td><td><a href="/region/sejong-area">세종특별자치시</a></td><td class="r">190</td><td class="r">122,049</td><td class="r num"><strong>1,001.9</strong></td><td class="r num">241,143</td><td class="r"><span class="mom up">▲ 0.5%</span></td></tr>
+<tr><td class="n">18</td><td><a href="/region/gyeongnam-yangsansi">경상남도 양산시</a></td><td class="r">180</td><td class="r">120,968</td><td class="r num"><strong>918.7</strong></td><td class="r num">185,012</td><td class="r"><span class="mom up">▲ 0.9%</span></td></tr>
+<tr><td class="n">19</td><td><a href="/region/gyeonggi-yongingiheunggu">경기도 용인기흥구</a></td><td class="r">208</td><td class="r">118,869</td><td class="r num"><strong>1,059.1</strong></td><td class="r num">278,429</td><td class="r"><span class="mom up">▲ 0.9%</span></td></tr>
+<tr><td class="n">20</td><td><a href="/region/chungnam-asansi">충청남도 아산시</a></td><td class="r">179</td><td class="r">116,680</td><td class="r num"><strong>1,044.8</strong></td><td class="r num">207,426</td><td class="r"><span class="mom up">▲ 1.4%</span></td></tr>
+<tr><td class="n">21</td><td><a href="/region/daejeon-seogu">대전광역시 서구</a></td><td class="r">146</td><td class="r">115,242</td><td class="r num"><strong>1,000.2</strong></td><td class="r num">221,292</td><td class="r"><span class="mom up">▲ 0.2%</span></td></tr>
+<tr><td class="n">22</td><td><a href="/region/seoul-songpagu">서울특별시 송파구</a></td><td class="r">144</td><td class="r">114,147</td><td class="r num"><strong>1,208.6</strong></td><td class="r num">276,784</td><td class="r"><span class="mom up">▲ 1.3%</span></td></tr>
+<tr><td class="n">23</td><td><a href="/region/incheon-namdonggu">인천광역시 남동구</a></td><td class="r">142</td><td class="r">113,401</td><td class="r num"><strong>1,005.1</strong></td><td class="r num">220,274</td><td class="r"><span class="mom up">▲ 1.3%</span></td></tr>
+<tr><td class="n">24</td><td><a href="/region/gangwon-wonjusi">강원특별자치도 원주시</a></td><td class="r">213</td><td class="r">112,070</td><td class="r num"><strong>1,004.6</strong></td><td class="r num">186,075</td><td class="r"><span class="mom up">▲ 1.1%</span></td></tr>
+<tr><td class="n">25</td><td><a href="/region/daegu-bukgu">대구광역시 북구</a></td><td class="r">186</td><td class="r">110,884</td><td class="r num"><strong>936.2</strong></td><td class="r num">200,347</td><td class="r"><span class="mom up">▲ 1.6%</span></td></tr>
+<tr><td class="n">26</td><td><a href="/region/seoul-gangnamgu">서울특별시 강남구</a></td><td class="r">177</td><td class="r">109,220</td><td class="r num"><strong>1,582.8</strong></td><td class="r num">326,054</td><td class="r"><span class="mom up">▲ 1.3%</span></td></tr>
+<tr><td class="n">27</td><td><a href="/region/incheon-bupyeonggu">인천광역시 부평구</a></td><td class="r">140</td><td class="r">108,486</td><td class="r num"><strong>1,027.4</strong></td><td class="r num">216,336</td><td class="r"><span class="mom up">▲ 1.3%</span></td></tr>
+<tr><td class="n">28</td><td><a href="/region/daejeon-yuseonggu">대전광역시 유성구</a></td><td class="r">162</td><td class="r">103,565</td><td class="r num"><strong>978.8</strong></td><td class="r num">232,190</td><td class="r"><span class="mom up">▲ 0.3%</span></td></tr>
+<tr><td class="n">29</td><td><a href="/region/busan-haeundaegu">부산광역시 해운대구</a></td><td class="r">174</td><td class="r">103,045</td><td class="r num"><strong>1,101.5</strong></td><td class="r num">270,761</td><td class="r"><span class="mom up">▲ 0.7%</span></td></tr>
+<tr><td class="n">30</td><td><a href="/region/gyeonggi-yonginsujigu">경기도 용인수지구</a></td><td class="r">188</td><td class="r">101,037</td><td class="r num"><strong>1,091.5</strong></td><td class="r num">326,708</td><td class="r"><span class="mom up">▲ 1.4%</span></td></tr>
+<tr><td class="n">31</td><td><a href="/region/gyeongbuk-gumisi">경상북도 구미시</a></td><td class="r">167</td><td class="r">97,995</td><td class="r num"><strong>878.9</strong></td><td class="r num">185,027</td><td class="r"><span class="mom up">▲ 1.8%</span></td></tr>
+<tr><td class="n">32</td><td><a href="/region/daegu-suseonggu">대구광역시 수성구</a></td><td class="r">228</td><td class="r">95,181</td><td class="r num"><strong>1,037.2</strong></td><td class="r num">245,569</td><td class="r"><span class="mom up">▲ 1.9%</span></td></tr>
+<tr><td class="n">33</td><td><a href="/region/gyeonggi-yangjusi">경기도 양주시</a></td><td class="r">139</td><td class="r">94,452</td><td class="r num"><strong>974.8</strong></td><td class="r num">219,302</td><td class="r"><span class="mom up">▲ 1.1%</span></td></tr>
+<tr><td class="n">34</td><td><a href="/region/gyeonggi-suwonyeongtonggu">경기도 수원영통구</a></td><td class="r">125</td><td class="r">93,628</td><td class="r num"><strong>1,114.2</strong></td><td class="r num">274,689</td><td class="r"><span class="mom up">▲ 1.1%</span></td></tr>
+<tr><td class="n">35</td><td><a href="/region/seoul-gangseogu">서울특별시 강서구</a></td><td class="r">175</td><td class="r">92,729</td><td class="r num"><strong>1,107.1</strong></td><td class="r num">197,496</td><td class="r"><span class="mom up">▲ 1.2%</span></td></tr>
+<tr><td class="n">36</td><td><a href="/region/seoul-gangdonggu">서울특별시 강동구</a></td><td class="r">118</td><td class="r">90,016</td><td class="r num"><strong>1,111.9</strong></td><td class="r num">251,057</td><td class="r"><span class="mom up">▲ 1.2%</span></td></tr>
+<tr><td class="n">37</td><td><a href="/region/jeonnamgwangju-seogu">전남광주통합특별시 서구</a></td><td class="r">169</td><td class="r">86,757</td><td class="r num"><strong>871.4</strong></td><td class="r num">205,730</td><td class="r"><span class="mom up">▲ 2.7%</span></td></tr>
+<tr><td class="n">38</td><td><a href="/region/gyeonggi-suwongwonseongu">경기도 수원권선구</a></td><td class="r">131</td><td class="r">85,167</td><td class="r num"><strong>1,017.4</strong></td><td class="r num">238,856</td><td class="r"><span class="mom up">▲ 0.5%</span></td></tr>
+<tr><td class="n">39</td><td><a href="/region/daegu-donggu">대구광역시 동구</a></td><td class="r">145</td><td class="r">83,154</td><td class="r num"><strong>981.3</strong></td><td class="r num">204,341</td><td class="r"><span class="mom up">▲ 2.3%</span></td></tr>
+<tr><td class="n">40</td><td><a href="/region/gyeonggi-hanamsi">경기도 하남시</a></td><td class="r">113</td><td class="r">83,149</td><td class="r num"><strong>1,023.6</strong></td><td class="r num">238,823</td><td class="r"><span class="mom up">▲ 1.6%</span></td></tr>
+<tr><td class="n">41</td><td><a href="/region/incheon-geomdangu">인천광역시 검단구</a></td><td class="r">114</td><td class="r">82,852</td><td class="r num"><strong>1,039.0</strong></td><td class="r num">239,457</td><td class="r"><span class="mom up">▲ 1.1%</span></td></tr>
+<tr><td class="n">42</td><td><a href="/region/gyeongbuk-pohangbukgu">경상북도 포항북구</a></td><td class="r">134</td><td class="r">82,088</td><td class="r num"><strong>789.6</strong></td><td class="r num">184,802</td><td class="r"><span class="mom up">▲ 2.3%</span></td></tr>
+<tr><td class="n">43</td><td><a href="/region/jeonbuk-jeonjuwansangu">전북특별자치도 전주완산구</a></td><td class="r">159</td><td class="r">80,485</td><td class="r num"><strong>915.9</strong></td><td class="r num">186,526</td><td class="r"><span class="mom up">▲ 0.9%</span></td></tr>
+<tr><td class="n">44</td><td><a href="/region/daegu-dalseonggun">대구광역시 달성군</a></td><td class="r">121</td><td class="r">80,335</td><td class="r num"><strong>933.7</strong></td><td class="r num">195,400</td><td class="r"><span class="mom up">▲ 1.7%</span></td></tr>
+<tr><td class="n">45</td><td><a href="/region/busan-busanjingu">부산광역시 부산진구</a></td><td class="r">146</td><td class="r">79,135</td><td class="r num"><strong>979.6</strong></td><td class="r num">215,235</td><td class="r"><span class="mom up">▲ 3.5%</span></td></tr>
+<tr><td class="n">46</td><td><a href="/region/chungbuk-cheongjuheungdeokgu">충청북도 청주흥덕구</a></td><td class="r">137</td><td class="r">79,021</td><td class="r num"><strong>1,022.6</strong></td><td class="r num">233,665</td><td class="r"><span class="mom up">▲ 0.7%</span></td></tr>
+<tr><td class="n">47</td><td><a href="/region/jeonbuk-jeonjudeokjingu">전북특별자치도 전주덕진구</a></td><td class="r">153</td><td class="r">78,450</td><td class="r num"><strong>934.7</strong></td><td class="r num">195,887</td><td class="r"><span class="mom up">▲ 1.6%</span></td></tr>
+<tr><td class="n">48</td><td><a href="/region/jeonnamgwangju-suncheonsi">전남광주통합특별시 순천시</a></td><td class="r">132</td><td class="r">77,372</td><td class="r num"><strong>877.3</strong></td><td class="r num">197,679</td><td class="r"><span class="mom up">▲ 3.0%</span></td></tr>
+<tr><td class="n">49</td><td><a href="/region/gyeonggi-goyangilsanseogu">경기도 고양일산서구</a></td><td class="r">135</td><td class="r">76,947</td><td class="r num"><strong>1,053.4</strong></td><td class="r num">268,208</td><td class="r"><span class="mom up">▲ 1.9%</span></td></tr>
+<tr><td class="n">50</td><td><a href="/region/gyeonggi-osansi">경기도 오산시</a></td><td class="r">103</td><td class="r">76,777</td><td class="r num"><strong>1,036.8</strong></td><td class="r num">232,281</td><td class="r"><span class="mom up">▲ 0.9%</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section>
+  <h2>평당가가 낮은 지역 (거래 50건 이상)</h2>
+  <p class="sub">2026년 10월 기준 중간 평당가가 낮은 순입니다.</p>
+  <div class="tablewrap"><table class="data"><thead><tr>
+    <th>지역</th><th class="r">평당가(만원)</th><th class="r">중간 매매가</th><th class="r">거래 건수</th>
+  </tr></thead><tbody><tr><td><a href="/region/gyeongbuk-yeongcheonsi">경상북도 영천시</a></td><td class="r num">443.3</td><td class="r num">8,000만원</td><td class="r">51</td></tr><tr><td><a href="/region/gyeongbuk-chilgokgun">경상북도 칠곡군</a></td><td class="r num">457.6</td><td class="r num">9,200만원</td><td class="r">71</td></tr><tr><td><a href="/region/gyeongbuk-pohangnamgu">경상북도 포항남구</a></td><td class="r num">488.1</td><td class="r num">1억 1,000만원</td><td class="r">137</td></tr><tr><td><a href="/region/jeonbuk-gunsansi">전북특별자치도 군산시</a></td><td class="r num">507.8</td><td class="r num">1억 1,100만원</td><td class="r">262</td></tr><tr><td><a href="/region/chungbuk-eumseonggun">충청북도 음성군</a></td><td class="r num">545.7</td><td class="r num">1억 2,000만원</td><td class="r">65</td></tr><tr><td><a href="/region/jeonbuk-jeongeupsi">전북특별자치도 정읍시</a></td><td class="r num">548.0</td><td class="r num">9,300만원</td><td class="r">51</td></tr><tr><td><a href="/region/jeonnamgwangju-gwangyangsi">전남광주통합특별시 광양시</a></td><td class="r num">564.6</td><td class="r num">7,250만원</td><td class="r">192</td></tr><tr><td><a href="/region/gyeongnam-geojesi">경상남도 거제시</a></td><td class="r num">584.6</td><td class="r num">1억 2,950만원</td><td class="r">196</td></tr><tr><td><a href="/region/jeonbuk-iksansi">전북특별자치도 익산시</a></td><td class="r num">608.5</td><td class="r num">1억 2,500만원</td><td class="r">191</td></tr><tr><td><a href="/region/gyeongnam-sacheonsi">경상남도 사천시</a></td><td class="r num">621.4</td><td class="r num">1억 5,800만원</td><td class="r">97</td></tr></tbody></table></div>
+</section>
+
+<section class="two">
+  <div>
+    <h2>㎡당 관리비가 낮은 지역</h2>
+    <p class="sub">단지 30곳 이상 집계된 지역만 비교했습니다.</p>
+    <div class="tablewrap"><table class="data"><thead><tr><th class="n">#</th><th>지역</th><th class="r">단지</th><th class="r">세대</th><th class="r">㎡당 공용관리비</th><th class="r">세대당 총관리비</th><th class="r">전월</th></tr></thead><tbody>
+<tr><td class="n">1</td><td><a href="/region/gyeongbuk-pohangbukgu">경상북도 포항북구</a></td><td class="r">134</td><td class="r">82,088</td><td class="r num"><strong>789.6</strong></td><td class="r num">184,802</td><td class="r"><span class="mom up">▲ 2.3%</span></td></tr>
+<tr><td class="n">2</td><td><a href="/region/jeonnamgwangju-gwangyangsi">전남광주통합특별시 광양시</a></td><td class="r">99</td><td class="r">57,595</td><td class="r num"><strong>805.4</strong></td><td class="r num">167,965</td><td class="r"><span class="mom up">▲ 1.6%</span></td></tr>
+<tr><td class="n">3</td><td><a href="/region/jeonnamgwangju-najusi">전남광주통합특별시 나주시</a></td><td class="r">43</td><td class="r">28,709</td><td class="r num"><strong>826.1</strong></td><td class="r num">196,633</td><td class="r"><span class="mom up">▲ 1.7%</span></td></tr>
+<tr><td class="n">4</td><td><a href="/region/gyeongnam-changwonseongsangu">경상남도 창원성산구</a></td><td class="r">83</td><td class="r">70,844</td><td class="r num"><strong>835.2</strong></td><td class="r num">197,943</td><td class="r"><span class="mom up">▲ 2.3%</span></td></tr>
+<tr><td class="n">5</td><td><a href="/region/gyeongnam-changwonmasanhoewongu">경상남도 창원마산회원구</a></td><td class="r">67</td><td class="r">35,954</td><td class="r num"><strong>838.5</strong></td><td class="r num">203,291</td><td class="r"><span class="mom up">▲ 2.5%</span></td></tr>
+<tr><td class="n">6</td><td><a href="/region/gyeongbuk-pohangnamgu">경상북도 포항남구</a></td><td class="r">75</td><td class="r">35,723</td><td class="r num"><strong>840.5</strong></td><td class="r num">180,527</td><td class="r"><span class="mom up">▲ 3.2%</span></td></tr>
+<tr><td class="n">7</td><td><a href="/region/gyeongbuk-yeongcheonsi">경상북도 영천시</a></td><td class="r">36</td><td class="r">17,901</td><td class="r num"><strong>851.7</strong></td><td class="r num">155,900</td><td class="r"><span class="mom up">▲ 2.0%</span></td></tr>
+<tr><td class="n">8</td><td><a href="/region/busan-bukgu">부산광역시 북구</a></td><td class="r">94</td><td class="r">75,377</td><td class="r num"><strong>852.9</strong></td><td class="r num">181,369</td><td class="r"><span class="mom up">▲ 1.9%</span></td></tr>
+<tr><td class="n">9</td><td><a href="/region/gyeongnam-changwonjinhaegu">경상남도 창원진해구</a></td><td class="r">77</td><td class="r">43,476</td><td class="r num"><strong>853.4</strong></td><td class="r num">200,710</td><td class="r"><span class="mom up">▲ 4.6%</span></td></tr>
+<tr><td class="n">10</td><td><a href="/region/gyeongnam-tongyeongsi">경상남도 통영시</a></td><td class="r">69</td><td class="r">20,509</td><td class="r num"><strong>857.2</strong></td><td class="r num">185,766</td><td class="r"><span class="mom up">▲ 1.9%</span></td></tr>
+</tbody></table></div>
+  </div>
+  <div>
+    <h2>㎡당 관리비가 높은 지역</h2>
+    <p class="sub">같은 조건입니다. 고급·대형 단지 비중, 위탁관리 여부에 따라 달라집니다.</p>
+    <div class="tablewrap"><table class="data"><thead><tr><th class="n">#</th><th>지역</th><th class="r">단지</th><th class="r">세대</th><th class="r">㎡당 공용관리비</th><th class="r">세대당 총관리비</th><th class="r">전월</th></tr></thead><tbody>
+<tr><td class="n">1</td><td><a href="/region/seoul-yongsangu">서울특별시 용산구</a></td><td class="r">67</td><td class="r">26,243</td><td class="r num"><strong>1,682.4</strong></td><td class="r num">416,747</td><td class="r"><span class="mom up">▲ 1.0%</span></td></tr>
+<tr><td class="n">2</td><td><a href="/region/seoul-gangnamgu">서울특별시 강남구</a></td><td class="r">177</td><td class="r">109,220</td><td class="r num"><strong>1,582.8</strong></td><td class="r num">326,054</td><td class="r"><span class="mom up">▲ 1.3%</span></td></tr>
+<tr><td class="n">3</td><td><a href="/region/seoul-seochogu">서울특별시 서초구</a></td><td class="r">147</td><td class="r">72,001</td><td class="r num"><strong>1,483.6</strong></td><td class="r num">360,507</td><td class="r"><span class="mom up">▲ 1.1%</span></td></tr>
+<tr><td class="n">4</td><td><a href="/region/seoul-junggu">서울특별시 중구</a></td><td class="r">43</td><td class="r">20,969</td><td class="r num"><strong>1,430.5</strong></td><td class="r num">250,894</td><td class="r"><span class="mom up">▲ 0.6%</span></td></tr>
+<tr><td class="n">5</td><td><a href="/region/seoul-gwangjingu">서울특별시 광진구</a></td><td class="r">78</td><td class="r">28,485</td><td class="r num"><strong>1,394.7</strong></td><td class="r num">306,774</td><td class="r"><span class="mom up">▲ 1.7%</span></td></tr>
+<tr><td class="n">6</td><td><a href="/region/seoul-seongdonggu">서울특별시 성동구</a></td><td class="r">106</td><td class="r">58,120</td><td class="r num"><strong>1,328.2</strong></td><td class="r num">270,221</td><td class="r"><span class="mom up">▲ 1.1%</span></td></tr>
+<tr><td class="n">7</td><td><a href="/region/seoul-jongrogu">서울특별시 종로구</a></td><td class="r">32</td><td class="r">11,141</td><td class="r num"><strong>1,323.3</strong></td><td class="r num">261,834</td><td class="r"><span class="mom up">▲ 1.3%</span></td></tr>
+<tr><td class="n">8</td><td><a href="/region/seoul-nowongu">서울특별시 노원구</a></td><td class="r">199</td><td class="r">143,182</td><td class="r num"><strong>1,315.7</strong></td><td class="r num">194,060</td><td class="r"><span class="mom up">▲ 1.4%</span></td></tr>
+<tr><td class="n">9</td><td><a href="/region/seoul-yangcheongu">서울특별시 양천구</a></td><td class="r">107</td><td class="r">54,786</td><td class="r num"><strong>1,307.6</strong></td><td class="r num">256,484</td><td class="r"><span class="mom up">▲ 1.3%</span></td></tr>
+<tr><td class="n">10</td><td><a href="/region/seoul-yeongdeungpogu">서울특별시 영등포구</a></td><td class="r">149</td><td class="r">59,817</td><td class="r num"><strong>1,303.9</strong></td><td class="r num">259,109</td><td class="r"><span class="mom up">▲ 1.0%</span></td></tr>
+</tbody></table></div>
+  </div>
+</section>
+
+<section class="faq"><h2>자주 묻는 질문</h2>
+<details><summary>이 사이트의 관리비 숫자는 어디서 오나요?</summary><p>K-apt(공동주택관리정보시스템)가 주 1회 공개하는 ‘관리비공개의무단지 관리비정보’ 파일과 ‘면적정보’ 파일을 그대로 집계했습니다. 이번 스냅샷은 2026-11-20 추출본이고, 기준월은 2026년 9월입니다.</p></details>
+<details><summary>실거래가는 어떻게 집계했나요?</summary><p>국토교통부 실거래가공개시스템의 자료제공 CSV(아파트 매매, 계약일 기준)를 받아 시군구별로 집계했습니다. 해제된 거래는 빼고, 거래 건수·중간 거래금액·중간 평당가를 계산합니다. 이번 기준월은 2026년 10월입니다.</p></details>
+<details><summary>㎡당 공용관리비는 어떻게 계산하나요?</summary><p>단지별 ‘공용관리비 합계’를 그 단지의 ‘관리비부과면적(㎡)’으로 나눈 값입니다. 지역 값은 단지별 값을 면적(관리비부과면적)으로 가중평균했습니다. 현재 전국 가중평균은 1,028.3원/㎡입니다.</p></details>
+<details><summary>평당가는 어떻게 계산하나요?</summary><p>거래 1건마다 ‘거래금액 ÷ 전용면적 × 3.305785’로 평당 금액을 구한 뒤, 그 지역 거래들의 중간값을 씁니다. 평균 대신 중간값을 쓰는 이유는 고가 거래 한 건이 지역 값을 끌고 가지 않게 하기 위해서입니다.</p></details>
+<details><summary>세대당 총관리비는 무엇을 더한 값인가요?</summary><p>공용관리비 + 개별사용료(전기·수도·난방 등) + 장기수선충당금 월부과액을 더해 세대수로 나눈 값입니다. 개별사용료는 사용량에 따라 달라지므로 지역 비교에는 ㎡당 공용관리비를 권합니다.</p></details>
+<details><summary>왜 우리 단지가 보이지 않나요?</summary><p>K-apt 관리비 공개는 300세대 이상, 150세대 이상이면서 승강기 또는 중앙난방이 있는 단지 등 ‘관리비 공개의무단지’가 대상입니다. 이 기준에 들지 않거나 해당 월 공개가 없는 단지는 표에 나오지 않습니다. 이번 기준월 집계 단지는 19,345곳입니다.</p></details>
+<details><summary>관리비가 가장 싼 지역은 어디인가요?</summary><p>단지 30곳 이상이 집계된 지역 가운데 경상북도 포항북구가 ㎡당 789.6원으로 가장 낮았습니다. 다음은 전남광주통합특별시 광양시(805.4원), 전남광주통합특별시 나주시(826.1원) 순입니다.</p></details>
+<details><summary>얼마나 자주 갱신되나요?</summary><p>관리비는 K-apt 파일이 주 1회 갱신되고, 실거래가는 매일, 이 사이트는 매일 05:30(KST)에 자동으로 다시 만들어집니다.</p></details>
+</section>
+
+<section class="note">
+  <h2>숫자를 읽을 때</h2>
+  <ul>
+    <li>관리비는 단지마다 부과 항목과 면적 기준이 달라, ㎡당 공용관리비로 비교하는 것이 가장 공정합니다.</li>
+    <li>실거래는 계약일 기준이고 신고 기한이 30일이라, 최근 월은 신고가 더 들어오면 값이 달라집니다.</li>
+    <li>평당가는 전용면적 기준입니다. 같은 단지라도 평형·층·향에 따라 거래금액이 크게 달라집니다.</li>
+    <li>전체 지역 251곳의 표와 단지별 최근 9개월 추이는 지역 페이지에서 볼 수 있습니다.</li>
+  </ul>
+</section>
+<script>
+(function(){
+  var i=document.getElementById('q'), u=document.getElementById('qr'), p=null;
+  if(!i||!u) return;
+  function L(){ if(!p){ p=fetch('/api/search.json').then(function(r){return r.json();}); } return p; }
+  i.addEventListener('input', function(){
+    var q=i.value.trim().toLowerCase();
+    if(!q){ u.innerHTML=''; return; }
+    L().then(function(a){
+      var o=[], k, n=0;
+      for(k=0;k<a.length&&n<8;k++){ if(a[k].k.indexOf(q)>=0){ o.push('<li><a href="'+a[k].u+'">'+a[k].n+'</a></li>'); n++; } }
+      u.innerHTML = o.length ? o.join('') : '<li class="muted">결과 없음</li>';
+    });
+  });
+  i.addEventListener('focus', function(){ L(); });
+})();
+</script>
+</main>
+<footer>
+  <p>K-apt(공동주택관리정보시스템) 자료실 주 1회 공개 자료 · 기준월 2026년 9월 · 스냅샷 2026-11-20</p>
+  <p><a href="/about">데이터 출처·산식·한계</a> · <a href="/llms.txt">llms.txt</a> · <a href="/api/regions.json">JSON API</a> · <a href="/privacy">개인정보·쿠키</a></p>
+  <p class="small">이 사이트는 공개된 공공데이터를 집계해 보여줍니다. 개별 단지의 실제 부과액은 관리주체 고지서를 기준으로 하세요.</p>
+</footer>
+</body>
+</html>
