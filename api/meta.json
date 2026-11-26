@@ -1,0 +1,64 @@
+{
+ "site": "아파트 관리비 인사이트",
+ "url": "https://apt-cost-hub.pages.dev",
+ "as_of": "2026-11-20",
+ "data_month": "2026-09",
+ "provisional": true,
+ "sources": [
+  {
+   "name": "K-apt 공동주택관리정보시스템 (국토교통부)",
+   "files": [
+    "관리비공개의무단지 관리비정보",
+    "관리비공개의무단지 면적정보"
+   ],
+   "portal": "https://www.data.go.kr/data/3039714/fileData.do",
+   "license": "이용허락범위 제한 없음"
+  },
+  {
+   "name": "국토교통부 실거래가공개시스템 (자료제공 CSV, 아파트 매매)",
+   "portal": "https://rt.molit.go.kr/pt/xls/xls.do",
+   "basis": "계약일 기준, 해제 거래 제외",
+   "license": "공공데이터 개방 (출처 표시)"
+  }
+ ],
+ "units": {
+  "fee_m2": "원/㎡·월 (공용관리비)",
+  "total_m2": "원/㎡·월 (공용+개별+장충금)",
+  "fee_hh": "원/월",
+  "billing_area": "㎡",
+  "households": "세대",
+  "trade.median_price": "만원",
+  "trade.median_per_pyeong": "만원/평",
+  "trade.count": "건"
+ },
+ "counts": {
+  "regions": 251,
+  "complexes": 19345,
+  "trade_rows": 149277,
+  "households": 11155005,
+  "complex_pages": 1500,
+  "monthly_rows": 197102
+ },
+ "month_coverage": {
+  "2026-01": 21502,
+  "2026-02": 21525,
+  "2026-03": 21541,
+  "2026-04": 21556,
+  "2026-05": 21567,
+  "2026-06": 21572,
+  "2026-07": 21556,
+  "2026-08": 21497,
+  "2026-09": 19583,
+  "2026-10": 5203
+ },
+ "definitions": [
+  "㎡당 공용관리비 = 공용관리비 합계 / 관리비부과면적",
+  "지역 값 = Σ공용관리비 / Σ관리비부과면적 (면적 가중평균)",
+  "세대당 총관리비 = (공용관리비 + 개별사용료 + 장기수선충당금 월부과액) / 세대수",
+  "관리비 공개 의무단지(300세대 이상 등)만 포함",
+  "실거래는 계약일 기준이며 신고 기한 30일 때문에 최근 월은 잠정치",
+  "평당가 = 거래금액 / 전용면적 * 3.305785, 지역 값은 거래별 값의 중간값"
+ ],
+ "update": "관리비는 주 1회(K-apt), 실거래는 매일, 사이트는 매일 05:30 KST에 자동 재생성",
+ "search": "https://apt-cost-hub.pages.dev/api/search.json"
+}

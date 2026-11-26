@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>데이터 출처·산식·한계 | 아파트 관리비 인사이트</title>
+<meta name="description" content="K-apt 공개 자료를 어떻게 집계했는지, 어떤 한계가 있는지 정리했습니다.">
+<meta name="naver-site-verification" content="88213cdff6d1e074b13593e218da564f695914d8">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://apt-cost-hub.pages.dev/about">
+<link rel="alternate" type="text/plain" title="llms.txt" href="/llms.txt">
+<link rel="alternate" type="application/json" title="API" href="/api/regions.json">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="아파트 관리비 인사이트">
+<meta property="og:title" content="데이터 출처·산식·한계 | 아파트 관리비 인사이트">
+<meta property="og:description" content="K-apt 공개 자료를 어떻게 집계했는지, 어떤 한계가 있는지 정리했습니다.">
+<meta property="og:url" content="https://apt-cost-hub.pages.dev/about">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#0f172a">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css?v=1">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-J80R3CFWY8"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-J80R3CFWY8', { anonymize_ip: true });
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "WebPage",
+   "url": "https://apt-cost-hub.pages.dev/about",
+   "name": "데이터 출처·산식·한계",
+   "inLanguage": "ko-KR",
+   "dateModified": "2026-11-26"
+  },
+  {
+   "@type": "FAQPage",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "데이터 출처는 무엇인가요?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "K-apt(공동주택관리정보시스템) 자료실의 ‘K-apt 관리비공개의무단지 관리비정보’와 ‘면적정보’ 파일입니다. 두 자료는 공공데이터포털에도 같은 내용이 등록되어 있습니다(이용허락범위 제한 없음)."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "어떤 단지가 포함되나요?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "관리비 공개 의무단지(300세대 이상, 150세대 이상이면서 승강기·중앙난방 보유 등) 중 해당 월 관리비가 공개된 단지입니다."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "갱신 주기는 어떻게 되나요?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "K-apt는 주 1회 파일을 갱신하고 실거래는 매일 받아 반영하며, 이 사이트는 매일 05:30(KST)에 자동으로 다시 만들어집니다. 기준월은 공개가 끝난 최신 월입니다."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "값을 임의로 보정하거나 추정하지 않나요?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "아니요. 공개된 값을 그대로 쓰고, 계산은 나눗셈·가중평균만 합니다. 공개되지 않은 단지나 월은 비워 둡니다."
+     }
+    }
+   ]
+  }
+ ]
+}
+</script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/">아파트 관리비 인사이트</a>
+  <nav><a href="/">지역 순위</a><a href="/about">데이터·산식</a></nav>
+</header>
+<main>
+
+<section class="hero">
+  <h1>데이터 출처·산식·한계</h1>
+  <p class="lead">이 사이트의 모든 숫자가 어떻게 만들어졌는지 정리했습니다.</p>
+</section>
+<section>
+  <h2>출처</h2>
+  <ul>
+    <li>원자료: K-apt 공동주택관리정보시스템 자료실 — ‘관리비공개의무단지 관리비정보’, ‘관리비공개의무단지 면적정보’ (주 1회 공개)</li>
+    <li>공공데이터포털 등록본: 국토교통부_공동주택 단지 관리비 정보(3039714), 국토교통부_공동주택 단지 면적 정보(15073269)</li>
+    <li>실거래: 국토교통부 실거래가공개시스템 ‘조건별 자료제공’ CSV(아파트 매매, 계약일 기준) — 최근 4개월분</li>
+    <li>이용 조건: 이용허락범위 제한 없음(공공데이터포털 기준), 출처 표시</li>
+    <li>이번 스냅샷: 2026-11-20 추출 · 관리비 기준월 2026년 9월 · 집계 단지 19,345곳 · 시군구 251곳</li>
+    <li>실거래: 기준월 2026년 10월 · 최근 4개월 · 거래 149,277건</li>
+  </ul>
+</section>
+<section>
+  <h2>산식</h2>
+  <ul>
+    <li><strong>㎡당 공용관리비</strong> = 공용관리비 합계 ÷ 관리비부과면적(㎡)</li>
+    <li><strong>지역 값</strong> = 단지별 ㎡당 값의 면적 가중평균 (Σ공용관리비 ÷ Σ관리비부과면적)</li>
+    <li><strong>세대당 총관리비</strong> = (공용관리비 + 개별사용료 + 장기수선충당금 월부과액) ÷ 세대수</li>
+    <li><strong>중위값</strong> = 지역 내 단지별 ㎡당 값의 중앙값</li>
+    <li><strong>전월 대비</strong> = 같은 단지 집합 기준이 아니라 지역 전체 가중평균끼리의 비교입니다</li>
+    <li><strong>평당가</strong> = 거래금액 ÷ 전용면적 × 3.305785 (만원/평), 지역 값은 거래별 값의 중간값</li>
+    <li><strong>중간 매매가</strong> = 지역 내 거래금액의 중간값(만원)</li>
+  </ul>
+</section>
+<section>
+  <h2>한계</h2>
+  <ul>
+    <li>관리비 공개 의무가 없는 단지(소규모)는 포함되지 않습니다.</li>
+    <li>신고·공개가 늦은 단지는 해당 월 집계에서 빠지므로 잠정 집계월은 평균이 달라질 수 있습니다.</li>
+    <li>개별사용료(전기·수도·난방)는 사용량에 따라 달라 지역 비교 지표로 쓰지 않았습니다.</li>
+    <li>원자료의 면적 입력 오류 가능성이 큰 49개 단지(관리비부과면적÷세대수가 10㎡ 미만 또는 400㎡ 초과)와, 부과면적이 주거전용면적보다 작은 구조 오류 단지 50개는 ㎡당 지표에서 제외했습니다(면적 오류를 그대로 나누면 ㎡당 값이 몇 배로 부풀려집니다).</li>
+    <li>공용관리비 총액이 세대당 5,000원 미만인 16개 단지도 원자료 입력 오류로 보고 ㎡당 지표에서 제외했습니다(단지 자체는 목록에 남아 있습니다).</li>
+    <li>공용관리비 항목별 표의 ‘수선유지비’는 원자료의 수선유지비(합계)에서 이미 포함된 안전점검비·재해예방비를 빼낸 값이고, 두 항목은 따로 표기합니다. 세부항목이 공개되지 않은 단지분은 ‘미분류’ 행으로 남습니다.</li>
+    <li>실거래는 계약일 기준이고 신고 기한이 30일이므로, 최근 월은 신고가 더 들어오면 건수·중간가가 달라집니다.</li>
+    <li>평당가는 전용면적 기준이며, 같은 단지·평형이라도 층·향·수리 상태에 따라 달라집니다.</li>
+    <li>해제된 거래(해제사유발생일이 있는 건)는 집계에서 제외했습니다.</li>
+    <li>개별 단지의 실제 부과액은 관리주체 고지서가 기준입니다.</li>
+  </ul>
+</section>
+<section class="faq"><h2>자주 묻는 질문</h2>
+<details><summary>데이터 출처는 무엇인가요?</summary><p>K-apt(공동주택관리정보시스템) 자료실의 ‘K-apt 관리비공개의무단지 관리비정보’와 ‘면적정보’ 파일입니다. 두 자료는 공공데이터포털에도 같은 내용이 등록되어 있습니다(이용허락범위 제한 없음).</p></details>
+<details><summary>어떤 단지가 포함되나요?</summary><p>관리비 공개 의무단지(300세대 이상, 150세대 이상이면서 승강기·중앙난방 보유 등) 중 해당 월 관리비가 공개된 단지입니다.</p></details>
+<details><summary>갱신 주기는 어떻게 되나요?</summary><p>K-apt는 주 1회 파일을 갱신하고 실거래는 매일 받아 반영하며, 이 사이트는 매일 05:30(KST)에 자동으로 다시 만들어집니다. 기준월은 공개가 끝난 최신 월입니다.</p></details>
+<details><summary>값을 임의로 보정하거나 추정하지 않나요?</summary><p>아니요. 공개된 값을 그대로 쓰고, 계산은 나눗셈·가중평균만 합니다. 공개되지 않은 단지나 월은 비워 둡니다.</p></details>
+</section>
+</main>
+<footer>
+  <p>K-apt(공동주택관리정보시스템) 자료실 주 1회 공개 자료 · 기준월 2026년 9월 · 스냅샷 2026-11-20</p>
+  <p><a href="/about">데이터 출처·산식·한계</a> · <a href="/llms.txt">llms.txt</a> · <a href="/api/regions.json">JSON API</a> · <a href="/privacy">개인정보·쿠키</a></p>
+  <p class="small">이 사이트는 공개된 공공데이터를 집계해 보여줍니다. 개별 단지의 실제 부과액은 관리주체 고지서를 기준으로 하세요.</p>
+</footer>
+</body>
+</html>
